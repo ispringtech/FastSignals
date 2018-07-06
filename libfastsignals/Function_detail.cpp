@@ -4,6 +4,29 @@
 
 namespace is::signals::detail
 {
+
+PackedFunction::PackedFunction(PackedFunction&& other)
+	: m_proxy(std::move(other.m_proxy))
+{
+}
+
+PackedFunction::PackedFunction(const PackedFunction& other)
+	: m_proxy(other.m_proxy->Clone())
+{
+}
+
+PackedFunction& PackedFunction::operator=(PackedFunction&& other)
+{
+	m_proxy = std::move(other.m_proxy);
+	return *this;
+}
+
+PackedFunction& PackedFunction::operator=(const PackedFunction& other)
+{
+	m_proxy = other.m_proxy->Clone();
+	return *this;
+}
+
 unsigned PackedFunctionsStorage::AddImpl(PackedFunction function)
 {
 	std::lock_guard lock(m_mutex);

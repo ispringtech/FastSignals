@@ -7,7 +7,6 @@
 
 namespace is::signals::detail
 {
-
 class IFunctionProxyData
 {
 public:
@@ -25,11 +24,8 @@ public:
 	virtual Return operator()(Arguments...) const = 0;
 };
 
-template <class Function, class Signature>
-class FunctionProxy;
-
 template <class Function, class Return, class... Arguments>
-class FunctionProxy<Function, Return(Arguments...)> final : public IFunctionProxy<Return(Arguments...)>
+class FunctionProxy final : public IFunctionProxy<Return(Arguments...)>
 {
 public:
 	static_assert(std::is_same_v<std::invoke_result_t<Function, Arguments...>, Return>, "cannot construct function from non-callable or callable with different signature");
@@ -47,7 +43,33 @@ public:
 
 	std::unique_ptr<IFunctionProxyData> Clone() const final
 	{
-		return std::make_unique<FunctionProxy<Function, Return(Arguments...)>>(*this);
+		return std::make_unique<FunctionProxy<Function, Return, Arguments...>>(*this);
+	}
+
+private:
+	mutable Function m_function{};
+};
+
+template <class Function, class Return, class... Arguments>
+class FreeFunctionProxy final : public IFunctionProxy<Return(Arguments...)>
+{
+public:
+	static_assert(std::is_same_v<std::invoke_result_t<Function, Arguments...>, Return>, "cannot construct function from non-callable or callable with different signature");
+
+	template<class Function>
+	explicit FreeFunctionProxy(Function&& function)
+		: m_function(std::forward<Function>(function))
+	{
+	}
+
+	Return operator()(Arguments... args) const final
+	{
+		return std::invoke(m_function, args...);
+	}
+
+	std::unique_ptr<IFunctionProxyData> Clone() const final
+	{
+		return std::make_unique<FreeFunctionProxy<Function, Return, Arguments...>>(*this);
 	}
 
 private:
@@ -62,8 +84,12 @@ public:
 	template <class Function, class Return, class... Arguments>
 	void Init(Function&& function)
 	{
-		using RawFunction = typename std::remove_const_t<std::remove_cv_t<Function>>;
-		auto proxy = std::make_unique<FunctionProxy<RawFunction, Return(Arguments...)>>(std::forward<Function>(function));;
+		using DecayFunction = typename std::remove_reference_t<std::remove_cv_t<Function>>;
+		using ProxyType = typename std::conditional_t<std::is_function_v<DecayFunction>,
+			FreeFunctionProxy<Function, Return, Arguments...>,
+			FunctionProxy<DecayFunction, Return, Arguments...>>;
+
+		auto proxy = std::make_unique<ProxyType>(std::forward<Function>(function));
 		m_proxy.reset(proxy.release());
 	}
 
@@ -73,28 +99,10 @@ public:
 		return static_cast<const IFunctionProxy<Signature>&>(*m_proxy);
 	}
 
-	// TODO: move to cpp file.
-	PackedFunction(PackedFunction&& other)
-		: m_proxy(std::move(other.m_proxy))
-	{
-	}
-
-	PackedFunction(const PackedFunction& other)
-		: m_proxy(other.m_proxy->Clone())
-	{
-	}
-
-	PackedFunction& operator=(PackedFunction&& other)
-	{
-		m_proxy = std::move(other.m_proxy);
-		return *this;
-	}
-
-	PackedFunction& operator=(const PackedFunction& other)
-	{
-		m_proxy = other.m_proxy->Clone();
-		return *this;
-	}
+	PackedFunction(PackedFunction&& other);
+	PackedFunction(const PackedFunction& other);
+	PackedFunction& operator=(PackedFunction&& other);
+	PackedFunction& operator=(const PackedFunction& other);
 
 private:
 	std::unique_ptr<IFunctionProxyData> m_proxy;
@@ -116,8 +124,9 @@ public:
 	template<class Signature, class ...Args>
 	void Invoke(Args... args) const
 	{
-		// TODO: add result combiners
-		// TODO: remove loop traversing from template code (use FunctionView).
+		// TODO: (feature) add result combiners
+		// TODO: (optimization) remove loop traversing from template code (use FunctionView).
+		// TODO: (optimization) implement copy-on-write for functions array to avoid unnecessary copying on emit.
 		for (auto&& function : GetFunctions())
 		{
 			function.Get<Signature>(args...);

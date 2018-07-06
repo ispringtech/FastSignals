@@ -8,6 +8,8 @@ namespace is::signals
 template<class Signature>
 class Function;
 
+// Compact function class - causes minimal code bloat when compiled.
+// Replaces std::function in this library.
 template <class Return, class... Arguments>
 class Function<Return(Arguments...)>
 {

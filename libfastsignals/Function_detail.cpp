@@ -5,38 +5,38 @@
 namespace is::signals::detail
 {
 
-PackedFunction::PackedFunction(PackedFunction&& other)
+packed_function::packed_function(packed_function&& other)
 	: m_proxy(std::move(other.m_proxy))
 {
 }
 
-PackedFunction::PackedFunction(const PackedFunction& other)
+packed_function::packed_function(const packed_function& other)
 	: m_proxy(other.m_proxy->Clone())
 {
 }
 
-PackedFunction& PackedFunction::operator=(PackedFunction&& other)
+packed_function& packed_function::operator=(packed_function&& other)
 {
 	m_proxy = std::move(other.m_proxy);
 	return *this;
 }
 
-PackedFunction& PackedFunction::operator=(const PackedFunction& other)
+packed_function& packed_function::operator=(const packed_function& other)
 {
 	m_proxy = other.m_proxy->Clone();
 	return *this;
 }
 
-unsigned PackedFunctionsStorage::AddImpl(PackedFunction function)
+unsigned packed_function_storage::add_impl(packed_function function)
 {
 	std::lock_guard lock(m_mutex);
 	unsigned id = ++m_nextId;
-	m_data.emplace_back(PackedFunctionWithId{ std::move(function), id });
+	m_data.emplace_back(packed_function_with_id{ std::move(function), id });
 
 	return id;
 }
 
-void PackedFunctionsStorage::Remove(unsigned id)
+void packed_function_storage::remove(unsigned id)
 {
 	std::lock_guard lock(m_mutex);
 	auto it = std::find_if(m_data.begin(), m_data.end(), [id](auto&& fn) {
@@ -48,10 +48,16 @@ void PackedFunctionsStorage::Remove(unsigned id)
 	}
 }
 
-std::vector<PackedFunction> PackedFunctionsStorage::GetFunctions() const
+void packed_function_storage::remove_all()
 {
 	std::lock_guard lock(m_mutex);
-	std::vector<PackedFunction> result(m_data.size());
+	m_data.clear();
+}
+
+std::vector<packed_function> packed_function_storage::get_functions() const
+{
+	std::lock_guard lock(m_mutex);
+	std::vector<packed_function> result(m_data.size());
 	std::transform(m_data.begin(), m_data.end(), result.begin(), [](auto&& fnWithid) {
 		return fnWithid.function;
 	});

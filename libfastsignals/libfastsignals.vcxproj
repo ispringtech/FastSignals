@@ -155,14 +155,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Function.h" />
-    <ClInclude Include="FunctionView.h" />
-    <ClInclude Include="Function_detail.h" />
-    <ClInclude Include="Signal.h" />
+    <ClInclude Include="function.h" />
+    <ClInclude Include="function_view.h" />
+    <ClInclude Include="function_detail.h" />
+    <ClInclude Include="signal.h" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Function_detail.cpp" />
+    <ClCompile Include="function_detail.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

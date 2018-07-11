@@ -6,6 +6,7 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="stdafx.cpp" />
-    <ClCompile Include="Function_tests.cpp" />
+    <ClCompile Include="signal_tests.cpp" />
+    <ClCompile Include="function_tests.cpp" />
   </ItemGroup>
 </Project>

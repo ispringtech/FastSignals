@@ -2,13 +2,13 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
-    <ClInclude Include="Function.h" />
-    <ClInclude Include="Signal.h" />
-    <ClInclude Include="Function_detail.h" />
-    <ClInclude Include="FunctionView.h" />
+    <ClInclude Include="function_view.h" />
+    <ClInclude Include="function_detail.h" />
+    <ClInclude Include="function.h" />
+    <ClInclude Include="signal.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />
-    <ClCompile Include="Function_detail.cpp" />
+    <ClCompile Include="function_detail.cpp" />
   </ItemGroup>
 </Project>

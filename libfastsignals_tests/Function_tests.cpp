@@ -1,7 +1,7 @@
 #include "stdafx.h"
 
 #include "catch2/catch.hpp"
-#include "libfastsignals/Function.h"
+#include "libfastsignals/function.h"
 
 using namespace is::signals;
 
@@ -86,33 +86,33 @@ private:
 };
 }
 
-TEST_CASE("Can use free function with 1 argument", "[Function]") {
-	Function<int(int)> fn = Abs;
+TEST_CASE("Can use free function with 1 argument", "[function]") {
+	function<int(int)> fn = Abs;
 	REQUIRE(fn(10) == 10);
 	REQUIRE(fn(-10) == 10);
 	REQUIRE(fn(0) == 0);
 }
 
-TEST_CASE("Can use free function with 2 arguments", "[Function]") {
-	Function<int(int, int)> fn = Sum;
+TEST_CASE("Can use free function with 2 arguments", "[function]") {
+	function<int(int, int)> fn = Sum;
 	REQUIRE(fn(10, 5) == 15);
 	REQUIRE(fn(-10, 0) == -10);
 }
 
-TEST_CASE("Can use free function without arguments", "[Function]") {
-	Function<std::string()> fn = GetStringHello;
+TEST_CASE("Can use free function without arguments", "[function]") {
+	function<std::string()> fn = GetStringHello;
 	REQUIRE(fn() == "hello");
 }
 
-TEST_CASE("Can use free function without return value", "[Function]") {
-	Function<void(int&)> fn = InplaceAbs;
+TEST_CASE("Can use free function without return value", "[function]") {
+	function<void(int&)> fn = InplaceAbs;
 	int a = -10;
 	fn(a);
 	REQUIRE(a == 10);
 }
 
-TEST_CASE("Can use lambda with 1 argument", "[Function]") {
-	Function<int(int)> fn = [](int value) {
+TEST_CASE("Can use lambda with 1 argument", "[function]") {
+	function<int(int)> fn = [](int value) {
 		return Abs(value);
 	};
 	REQUIRE(fn(10) == 10);
@@ -120,24 +120,24 @@ TEST_CASE("Can use lambda with 1 argument", "[Function]") {
 	REQUIRE(fn(0) == 0);
 }
 
-TEST_CASE("Can use lambda with 2 arguments", "[Function]") {
-	Function<int(int, int)> fn = [](auto&& a, auto&& b) {
+TEST_CASE("Can use lambda with 2 arguments", "[function]") {
+	function<int(int, int)> fn = [](auto&& a, auto&& b) {
 		return Sum(a, b);
 	};
 	REQUIRE(fn(10, 5) == 15);
 	REQUIRE(fn(-10, 0) == -10);
 }
 
-TEST_CASE("Can use lambda without arguments", "[Function]") {
-	Function<std::string()> fn = [] {
+TEST_CASE("Can use lambda without arguments", "[function]") {
+	function<std::string()> fn = [] {
 		return GetStringHello();
 	};
 	REQUIRE(fn() == "hello");
 }
 
-TEST_CASE("Can use lambda without return value", "[Function]") {
+TEST_CASE("Can use lambda without return value", "[function]") {
 	bool calledOnce = false;
-	Function<void(int&)> fn = [calledOnce](auto& value) mutable {
+	function<void(int&)> fn = [calledOnce](auto& value) mutable {
 		if (calledOnce)
 		{
 			abort();
@@ -150,26 +150,26 @@ TEST_CASE("Can use lambda without return value", "[Function]") {
 	REQUIRE(a == 10);
 }
 
-TEST_CASE("Can use functor with 1 argument", "[Function]") {
-	Function<int(int)> fn = AbsFunctor();
+TEST_CASE("Can use functor with 1 argument", "[function]") {
+	function<int(int)> fn = AbsFunctor();
 	REQUIRE(fn(10) == 10);
 	REQUIRE(fn(-10) == 10);
 	REQUIRE(fn(0) == 0);
 }
 
-TEST_CASE("Can use functor with 2 arguments", "[Function]") {
-	Function<int(int, int)> fn = SumFunctor();
+TEST_CASE("Can use functor with 2 arguments", "[function]") {
+	function<int(int, int)> fn = SumFunctor();
 	REQUIRE(fn(10, 5) == 15);
 	REQUIRE(fn(-10, 0) == -10);
 }
 
-TEST_CASE("Can use functor without arguments", "[Function]") {
-	Function<std::string()> fn = GetStringFunctor("hello");
+TEST_CASE("Can use functor without arguments", "[function]") {
+	function<std::string()> fn = GetStringFunctor("hello");
 	REQUIRE(fn() == "hello");
 }
 
-TEST_CASE("Can use functor without return value", "[Function]") {
-	Function<void(int&)> fn = InplaceAbsFunctor();
+TEST_CASE("Can use functor without return value", "[function]") {
+	function<void(int&)> fn = InplaceAbsFunctor();
 	int a = -10;
 	fn(a);
 	REQUIRE(a == 10);

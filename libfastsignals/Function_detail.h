@@ -151,4 +151,7 @@ private:
 	unsigned m_nextId = 0;
 };
 
+using packed_function_storage_ptr = std::shared_ptr<packed_function_storage>;
+using packed_function_storage_weak_ptr = std::weak_ptr<packed_function_storage>;
+
 }

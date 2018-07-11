@@ -4,6 +4,7 @@
 #include <atomic>
 #include <vector>
 #include <mutex>
+#include <cstdint>
 
 namespace is::signals::detail
 {
@@ -113,14 +114,14 @@ class packed_function_storage
 {
 public:
 	template <class Function, class Return, class ...Args>
-	unsigned add(Function&& function)
+	uint64_t add(Function&& function)
 	{
 		packed_function packed;
 		packed.init<Function, Return, Args...>(std::forward<Function>(function));
 		return add_impl(packed);
 	}
 
-	void remove(unsigned id);
+	void remove(uint64_t id);
 
 	void remove_all();
 
@@ -137,18 +138,18 @@ public:
 	}
 
 private:
-	unsigned add_impl(packed_function function);
+	uint64_t add_impl(packed_function function);
 	std::vector<packed_function> get_functions() const;
 
 	struct packed_function_with_id
 	{
 		packed_function function;
-		unsigned id = 0;
+		uint64_t id = 0;
 	};
 
 	mutable std::mutex m_mutex;
 	std::vector<packed_function_with_id> m_data;
-	unsigned m_nextId = 0;
+	uint64_t m_nextId = 0;
 };
 
 using packed_function_storage_ptr = std::shared_ptr<packed_function_storage>;

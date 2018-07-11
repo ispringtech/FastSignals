@@ -15,7 +15,7 @@ class connection
 public:
 	connection() = default;
 
-	explicit connection(detail::packed_function_storage_weak_ptr storage, unsigned id)
+	explicit connection(detail::packed_function_storage_weak_ptr storage, uint64_t id)
 		: m_storage(std::move(storage))
 		, m_id(id)
 	{
@@ -51,7 +51,7 @@ public:
 
 protected:
 	detail::packed_function_storage_weak_ptr m_storage;
-	unsigned m_id = 0;
+	uint64_t m_id = 0;
 };
 
 // Scoped connection keeps link between signal and slot and disconnects them in destructor.
@@ -108,7 +108,7 @@ public:
 	template<class Function>
 	connection connect(Function&& function)
 	{
-		const unsigned id = m_slots->add<Function, Return, const Arguments&...>(std::forward<Function>(function));
+		const uint64_t id = m_slots->add<Function, Return, const Arguments&...>(std::forward<Function>(function));
 		return connection(m_slots, id);
 	}
 

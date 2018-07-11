@@ -27,16 +27,16 @@ packed_function& packed_function::operator=(const packed_function& other)
 	return *this;
 }
 
-unsigned packed_function_storage::add_impl(packed_function function)
+uint64_t packed_function_storage::add_impl(packed_function function)
 {
 	std::lock_guard lock(m_mutex);
-	unsigned id = ++m_nextId;
+	uint64_t id = ++m_nextId;
 	m_data.emplace_back(packed_function_with_id{ std::move(function), id });
 
 	return id;
 }
 
-void packed_function_storage::remove(unsigned id)
+void packed_function_storage::remove(uint64_t id)
 {
 	std::lock_guard lock(m_mutex);
 	auto it = std::find_if(m_data.begin(), m_data.end(), [id](auto&& fn) {

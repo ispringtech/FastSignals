@@ -22,7 +22,7 @@
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{BAC23A51-8DC1-4589-940F-9923D8E12718}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>libfastsignalstests</RootNamespace>
+    <RootNamespace>libfastsignals_unit_tests</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -72,19 +72,19 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir);$(SolutionDir)3rdparty;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir);$(SolutionDir)tests;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir);$(SolutionDir)3rdparty;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir);$(SolutionDir)tests;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(SolutionDir);$(SolutionDir)3rdparty;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir);$(SolutionDir)tests;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(SolutionDir);$(SolutionDir)3rdparty;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir);$(SolutionDir)tests;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -169,7 +169,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\libfastsignals\libfastsignals.vcxproj">
+    <ProjectReference Include="..\..\libfastsignals\libfastsignals.vcxproj">
       <Project>{32bd918f-edbc-4057-a033-10dc361da4a0}</Project>
     </ProjectReference>
   </ItemGroup>

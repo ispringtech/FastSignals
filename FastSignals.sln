@@ -5,7 +5,7 @@ VisualStudioVersion = 15.0.27703.2035
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libfastsignals", "libfastsignals\libfastsignals.vcxproj", "{32BD918F-EDBC-4057-A033-10DC361DA4A0}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libfastsignals_tests", "libfastsignals_tests\libfastsignals_tests.vcxproj", "{BAC23A51-8DC1-4589-940F-9923D8E12718}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libfastsignals_unit_tests", "tests\libfastsignals_unit_tests\libfastsignals_unit_tests.vcxproj", "{BAC23A51-8DC1-4589-940F-9923D8E12718}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

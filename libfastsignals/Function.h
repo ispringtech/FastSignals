@@ -10,6 +10,7 @@ class function;
 
 // Compact function class - causes minimal code bloat when compiled.
 // Replaces std::function in this library.
+// TODO: implement small buffer optimization.
 template <class Return, class... Arguments>
 class function<Return(Arguments...)>
 {
@@ -26,6 +27,11 @@ public:
 	{
 		auto& proxy = m_packed.get<Return(Arguments...)>();
 		return proxy(std::forward<Arguments>(args)...);
+	}
+
+	detail::packed_function pack()
+	{
+		return std::move(m_packed);
 	}
 
 private:

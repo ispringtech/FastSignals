@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Function_detail.h"
+#include "function.h"
 
 namespace is::signals
 {
@@ -38,6 +38,7 @@ public:
 		m_id = other.m_id;
 		other.m_storage.reset();
 		other.m_id = 0;
+		return *this;
 	}
 
 	void disconnect()
@@ -77,6 +78,7 @@ public:
 	{
 		disconnect();
 		static_cast<connection&>(*this) = std::move(other);
+		return *this;
 	}
 
 	~scoped_connection()
@@ -95,6 +97,9 @@ template <class Return, class... Arguments>
 class signal<Return(Arguments...)>
 {
 public:
+	using signature_type = typename Return(Arguments...);
+	using slot_type = typename function<Return(const Arguments&...)>;
+
 	signal()
 		: m_slots(std::make_shared<detail::packed_function_storage>())
 	{
@@ -105,10 +110,9 @@ public:
 	 * Each time you call signal as functor, all slots are also called with given arguments.
 	 * @returns connection - object which manages signal-slot connection lifetime
 	 */
-	template<class Function>
-	connection connect(Function&& function)
+	connection connect(slot_type slot)
 	{
-		const uint64_t id = m_slots->add<Function, Return, const Arguments&...>(std::forward<Function>(function));
+		const uint64_t id = m_slots->add(slot.pack());
 		return connection(m_slots, id);
 	}
 

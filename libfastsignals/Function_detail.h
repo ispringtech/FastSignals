@@ -5,6 +5,7 @@
 #include <vector>
 #include <mutex>
 #include <cstdint>
+#include <stdexcept>
 
 namespace is::signals::detail
 {
@@ -98,6 +99,10 @@ public:
 	template<class Signature>
 	const function_proxy<Signature>& get() const
 	{
+		if (!m_proxy)
+		{
+			throw std::bad_function_call();
+		}
 		return static_cast<const function_proxy<Signature>&>(*m_proxy);
 	}
 
@@ -113,13 +118,7 @@ private:
 class packed_function_storage
 {
 public:
-	template <class Function, class Return, class ...Args>
-	uint64_t add(Function&& function)
-	{
-		packed_function packed;
-		packed.init<Function, Return, Args...>(std::forward<Function>(function));
-		return add_impl(packed);
-	}
+	uint64_t add(packed_function fn);
 
 	void remove(uint64_t id);
 
@@ -138,17 +137,11 @@ public:
 	}
 
 private:
-	uint64_t add_impl(packed_function function);
 	std::vector<packed_function> get_functions() const;
 
-	struct packed_function_with_id
-	{
-		packed_function function;
-		uint64_t id = 0;
-	};
-
 	mutable std::mutex m_mutex;
-	std::vector<packed_function_with_id> m_data;
+	std::vector<packed_function> m_functions;
+	std::vector<uint64_t> m_ids;
 	uint64_t m_nextId = 0;
 };
 

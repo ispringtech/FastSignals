@@ -132,3 +132,35 @@ TEST_CASE("Can disconnect all", "[signal]") {
 	REQUIRE(value2 == 63);
 	REQUIRE(value3 == 63);
 }
+
+TEST_CASE("Can disconnect inside slot", "[signal]") {
+	signal<void(int)> valueChanged;
+
+	int value1 = 0;
+	int value2 = 0;
+	int value3 = 0;
+	connection conn2;
+	valueChanged.connect([&value1](int value) {
+		value1 = value;
+	});
+	conn2 = valueChanged.connect([&](int value) {
+		value2 = value;
+		conn2.disconnect();
+	});
+	valueChanged.connect([&value3](int value) {
+		value3 = value;
+	});
+	REQUIRE(value1 == 0);
+	REQUIRE(value2 == 0);
+	REQUIRE(value3 == 0);
+
+	valueChanged(63);
+	REQUIRE(value1 == 63);
+	REQUIRE(value2 == 63);
+	REQUIRE(value3 == 63);
+
+	valueChanged(101);
+	REQUIRE(value1 == 101);
+	REQUIRE(value2 == 63); // disconnected in slot.
+	REQUIRE(value3 == 101);
+}

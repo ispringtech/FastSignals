@@ -27,11 +27,12 @@ packed_function& packed_function::operator=(const packed_function& other)
 	return *this;
 }
 
-uint64_t packed_function_storage::add_impl(packed_function function)
+uint64_t packed_function_storage::add(packed_function fn)
 {
 	std::lock_guard lock(m_mutex);
 	uint64_t id = ++m_nextId;
-	m_data.emplace_back(packed_function_with_id{ std::move(function), id });
+	m_functions.emplace_back(std::move(fn));
+	m_ids.emplace_back(id);
 
 	return id;
 }
@@ -39,29 +40,28 @@ uint64_t packed_function_storage::add_impl(packed_function function)
 void packed_function_storage::remove(uint64_t id)
 {
 	std::lock_guard lock(m_mutex);
-	auto it = std::find_if(m_data.begin(), m_data.end(), [id](auto&& fn) {
-		return fn.id == id;
-	});
-	if (it != m_data.end())
+	for (size_t i = 0, n = m_ids.size(); i < n; ++i)
 	{
-		m_data.erase(it);
+		if (m_ids[i] == id)
+		{
+			m_ids.erase(m_ids.begin() + i);
+			m_functions.erase(m_functions.begin() + i);
+			break;
+		}
 	}
 }
 
 void packed_function_storage::remove_all()
 {
 	std::lock_guard lock(m_mutex);
-	m_data.clear();
+	m_functions.clear();
+	m_ids.clear();
 }
 
 std::vector<packed_function> packed_function_storage::get_functions() const
 {
 	std::lock_guard lock(m_mutex);
-	std::vector<packed_function> result(m_data.size());
-	std::transform(m_data.begin(), m_data.end(), result.begin(), [](auto&& fnWithid) {
-		return fnWithid.function;
-	});
-	return result;
+	return m_functions;
 }
 
 }

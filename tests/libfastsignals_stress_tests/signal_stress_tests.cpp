@@ -71,9 +71,9 @@ size_t get_random_index(size_t size)
 TEST_CASE("Can work in a few threads", "[signal]") {
 	constexpr unsigned fireThreadCount = 8;
 	constexpr unsigned signalsCount = 7;
-	constexpr unsigned fireCountPetThread = 10'000'000;
-	constexpr unsigned connectCallsCount = 12'000'000;
-	constexpr unsigned totalRunCount = 4;
+	constexpr unsigned fireCountPetThread = 100'000;
+	constexpr unsigned connectCallsCount = 80'000;
+	constexpr unsigned totalRunCount = 10;
 
 	for (unsigned i = 0; i < totalRunCount; ++i)
 	{
@@ -81,11 +81,14 @@ TEST_CASE("Can work in a few threads", "[signal]") {
 
 		std::mutex connectionsMutex;
 		std::vector<connection> connections;
+		connections.reserve(connectCallsCount);
+
 		std::vector<std::thread> threads;
 
 		auto slot = [&] {
-			const size_t index = get_random_index(signalsCount);
-			signals.at(index).disconnect_all();
+			std::lock_guard lock(connectionsMutex);
+			const size_t index = get_random_index(connections.size());
+			connections.at(index).disconnect();
 		};
 
 		threads.emplace_back([&] {
@@ -93,7 +96,10 @@ TEST_CASE("Can work in a few threads", "[signal]") {
 			{
 				const size_t index = get_random_index(signalsCount);
 				connection conn = signals.at(index).connect(slot);
-				connections.emplace_back(std::move(conn));
+				{
+					std::lock_guard lock(connectionsMutex);
+					connections.emplace_back(conn);
+				}
 			}
 		});
 

@@ -13,6 +13,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "benchmark", "tests\benchmar
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{6BBDE9AD-AF40-4DDF-8DA6-BEAD0A204033}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libfastsignals_stress_tests", "tests\libfastsignals_stress_tests\libfastsignals_stress_tests.vcxproj", "{751DC150-1907-4D9F-8566-AA4E24FDFA64}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -85,6 +87,22 @@ Global
 		{2A79174E-E22B-3D36-AEC3-3FA9EDA0F315}.RelWithDebInfo|x64.ActiveCfg = RelWithDebInfo|Win32
 		{2A79174E-E22B-3D36-AEC3-3FA9EDA0F315}.RelWithDebInfo|x86.ActiveCfg = RelWithDebInfo|Win32
 		{2A79174E-E22B-3D36-AEC3-3FA9EDA0F315}.RelWithDebInfo|x86.Build.0 = RelWithDebInfo|Win32
+		{751DC150-1907-4D9F-8566-AA4E24FDFA64}.Debug|x64.ActiveCfg = Debug|x64
+		{751DC150-1907-4D9F-8566-AA4E24FDFA64}.Debug|x64.Build.0 = Debug|x64
+		{751DC150-1907-4D9F-8566-AA4E24FDFA64}.Debug|x86.ActiveCfg = Debug|Win32
+		{751DC150-1907-4D9F-8566-AA4E24FDFA64}.Debug|x86.Build.0 = Debug|Win32
+		{751DC150-1907-4D9F-8566-AA4E24FDFA64}.MinSizeRel|x64.ActiveCfg = Release|x64
+		{751DC150-1907-4D9F-8566-AA4E24FDFA64}.MinSizeRel|x64.Build.0 = Release|x64
+		{751DC150-1907-4D9F-8566-AA4E24FDFA64}.MinSizeRel|x86.ActiveCfg = Release|Win32
+		{751DC150-1907-4D9F-8566-AA4E24FDFA64}.MinSizeRel|x86.Build.0 = Release|Win32
+		{751DC150-1907-4D9F-8566-AA4E24FDFA64}.Release|x64.ActiveCfg = Release|x64
+		{751DC150-1907-4D9F-8566-AA4E24FDFA64}.Release|x64.Build.0 = Release|x64
+		{751DC150-1907-4D9F-8566-AA4E24FDFA64}.Release|x86.ActiveCfg = Release|Win32
+		{751DC150-1907-4D9F-8566-AA4E24FDFA64}.Release|x86.Build.0 = Release|Win32
+		{751DC150-1907-4D9F-8566-AA4E24FDFA64}.RelWithDebInfo|x64.ActiveCfg = Release|x64
+		{751DC150-1907-4D9F-8566-AA4E24FDFA64}.RelWithDebInfo|x64.Build.0 = Release|x64
+		{751DC150-1907-4D9F-8566-AA4E24FDFA64}.RelWithDebInfo|x86.ActiveCfg = Release|Win32
+		{751DC150-1907-4D9F-8566-AA4E24FDFA64}.RelWithDebInfo|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -93,6 +111,7 @@ Global
 		{BAC23A51-8DC1-4589-940F-9923D8E12718} = {6BBDE9AD-AF40-4DDF-8DA6-BEAD0A204033}
 		{11473F6A-D8FC-47AB-9584-BBACDC473800} = {6BBDE9AD-AF40-4DDF-8DA6-BEAD0A204033}
 		{2A79174E-E22B-3D36-AEC3-3FA9EDA0F315} = {6BBDE9AD-AF40-4DDF-8DA6-BEAD0A204033}
+		{751DC150-1907-4D9F-8566-AA4E24FDFA64} = {6BBDE9AD-AF40-4DDF-8DA6-BEAD0A204033}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {12A1931D-508E-41C2-BAC6-B68CC62A710E}

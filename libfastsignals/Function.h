@@ -10,7 +10,6 @@ class function;
 
 // Compact function class - causes minimal code bloat when compiled.
 // Replaces std::function in this library.
-// TODO: implement small buffer optimization.
 template <class Return, class... Arguments>
 class function<Return(Arguments...)>
 {

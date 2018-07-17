@@ -45,5 +45,5 @@ void emit_boost(benchmark::State& state)
 	}
 }
 
-BENCHMARK(emit_fastsignals)->Iterations(20);
 BENCHMARK(emit_boost)->Iterations(20);
+BENCHMARK(emit_fastsignals)->Iterations(20);

@@ -164,3 +164,22 @@ TEST_CASE("Can disconnect inside slot", "[signal]") {
 	REQUIRE(value2 == 63); // disconnected in slot.
 	REQUIRE(value3 == 101);
 }
+
+TEST_CASE("Disconnects OK if signal dead first", "[signal]") {
+	connection conn2;
+	{
+		scoped_connection conn1;
+		{
+			signal<void(int)> valueChanged;
+			conn2 = valueChanged.connect([](int) {
+			});
+			// Just unused.
+			valueChanged.connect([](int) {
+			});
+			conn1 = valueChanged.connect([](int) {
+			});
+		}
+		conn2.disconnect();
+	}
+	conn2.disconnect();
+}

@@ -60,6 +60,8 @@ protected:
 class scoped_connection : public connection
 {
 public:
+	scoped_connection() = default;
+
 	scoped_connection(const connection& conn)
 		: connection(conn)
 	{

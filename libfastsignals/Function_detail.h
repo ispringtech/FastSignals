@@ -6,14 +6,18 @@
 #include <mutex>
 #include <cstdint>
 #include <stdexcept>
+#include <type_traits>
+#include <cassert>
 
 namespace is::signals::detail
 {
+static constexpr size_t function_buffer_size = 4 * sizeof(void*);
+
 class base_function_proxy
 {
 public:
 	virtual ~base_function_proxy() = default;
-	virtual std::unique_ptr<base_function_proxy> Clone() const = 0;
+	virtual base_function_proxy* clone(void* buffer) const = 0;
 };
 
 template<class Signature>
@@ -44,9 +48,16 @@ public:
 		return std::invoke(m_function, args...);
 	}
 
-	std::unique_ptr<base_function_proxy> Clone() const final
+	base_function_proxy* clone(void* buffer) const final
 	{
-		return std::make_unique<function_proxy_impl<Function, Return, Arguments...>>(*this);
+		if constexpr (sizeof(*this) > function_buffer_size)
+		{
+			return new function_proxy_impl(*this);
+		}
+		else
+		{
+			return new (buffer) function_proxy_impl(*this);
+		}
 	}
 
 private:
@@ -70,9 +81,16 @@ public:
 		return std::invoke(m_function, args...);
 	}
 
-	std::unique_ptr<base_function_proxy> Clone() const final
+	base_function_proxy* clone(void* buffer) const final
 	{
-		return std::make_unique<free_function_proxy_impl<Function, Return, Arguments...>>(*this);
+		if constexpr (sizeof(*this) > function_buffer_size)
+		{
+			return new free_function_proxy_impl(*this);
+		}
+		else
+		{
+			return new (buffer) free_function_proxy_impl(*this);
+		}
 	}
 
 private:
@@ -83,6 +101,11 @@ class packed_function
 {
 public:
 	packed_function() = default;
+	packed_function(packed_function&& other);
+	packed_function(const packed_function& other);
+	packed_function& operator=(packed_function&& other);
+	packed_function& operator=(const packed_function& other);
+	~packed_function() noexcept;
 
 	template <class Function, class Return, class... Arguments>
 	void init(Function&& function)
@@ -92,27 +115,32 @@ public:
 			free_function_proxy_impl<Function, Return, Arguments...>,
 			function_proxy_impl<DecayFunction, Return, Arguments...>>;
 
-		auto proxy = std::make_unique<ProxyType>(std::forward<Function>(function));
-		m_proxy.reset(proxy.release());
+		base_function_proxy *proxy = nullptr;
+		if constexpr (sizeof(ProxyType) > function_buffer_size)
+		{
+			proxy = new ProxyType{ std::forward<Function>(function) };
+		}
+		else
+		{
+			proxy = new (&m_buffer) ProxyType{ std::forward<Function>(function) };
+		}
+		reset();
+		m_proxy = proxy;
 	}
 
 	template<class Signature>
 	const function_proxy<Signature>& get() const
 	{
-		if (!m_proxy)
-		{
-			throw std::bad_function_call();
-		}
-		return static_cast<const function_proxy<Signature>&>(*m_proxy);
+		return static_cast<const function_proxy<Signature>&>(unwrap());
 	}
 
-	packed_function(packed_function&& other);
-	packed_function(const packed_function& other);
-	packed_function& operator=(packed_function&& other);
-	packed_function& operator=(const packed_function& other);
-
 private:
-	std::unique_ptr<base_function_proxy> m_proxy;
+	void reset() noexcept;
+	base_function_proxy& unwrap() const;
+	bool is_buffer_allocated() const;
+
+	base_function_proxy* m_proxy = nullptr;
+	std::aligned_storage_t<function_buffer_size> m_buffer;
 };
 
 class packed_function_storage

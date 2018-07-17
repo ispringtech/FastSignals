@@ -6,25 +6,85 @@ namespace is::signals::detail
 {
 
 packed_function::packed_function(packed_function&& other)
-	: m_proxy(std::move(other.m_proxy))
 {
+	if (other.is_buffer_allocated())
+	{
+		m_proxy = other.m_proxy->clone(&m_buffer);
+	}
+	else
+	{
+		m_proxy = other.m_proxy;
+		other.m_proxy = nullptr;
+	}
 }
 
 packed_function::packed_function(const packed_function& other)
-	: m_proxy(other.m_proxy->Clone())
 {
+	m_proxy = other.m_proxy->clone(&m_buffer);
 }
 
 packed_function& packed_function::operator=(packed_function&& other)
 {
-	m_proxy = std::move(other.m_proxy);
+	if (other.is_buffer_allocated())
+	{
+		auto* proxy = other.m_proxy->clone(&m_buffer);
+		reset();
+		m_proxy = proxy;
+	}
+	else
+	{
+		reset();
+		std::swap(m_proxy, other.m_proxy);
+	}
 	return *this;
 }
 
 packed_function& packed_function::operator=(const packed_function& other)
 {
-	m_proxy = other.m_proxy->Clone();
+	auto* proxy = other.m_proxy->clone(&m_buffer);
+	reset();
+	m_proxy = proxy;
 	return *this;
+}
+
+packed_function::~packed_function() noexcept
+{
+	reset();
+}
+
+#pragma optimize("", off)
+void packed_function::reset() noexcept
+{
+	if (m_proxy != nullptr)
+	{
+		if (is_buffer_allocated())
+		{
+			m_proxy->~base_function_proxy();
+		}
+		else
+		{
+			delete m_proxy;
+		}
+		m_proxy = nullptr;
+	}
+}
+#pragma optimize("", on)
+
+base_function_proxy& packed_function::unwrap() const
+{
+	if (!m_proxy)
+	{
+		throw std::bad_function_call();
+	}
+	return *m_proxy;
+}
+
+bool packed_function::is_buffer_allocated() const
+{
+	const std::byte* bufferStart = reinterpret_cast<const std::byte*>(&m_buffer);
+	const std::byte* bufferEnd = reinterpret_cast<const std::byte*>(&m_buffer + 1);
+	const std::byte* proxy = reinterpret_cast<const std::byte*>(m_proxy);
+	return (proxy >= bufferStart && proxy < bufferEnd);
 }
 
 uint64_t packed_function_storage::add(packed_function fn)

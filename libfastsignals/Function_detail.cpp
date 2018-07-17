@@ -99,6 +99,7 @@ uint64_t packed_function_storage::add(packed_function fn)
 
 void packed_function_storage::remove(uint64_t id)
 {
+	// TODO: use binary search (ids array is always sorted)
 	std::lock_guard lock(m_mutex);
 	for (size_t i = 0, n = m_ids.size(); i < n; ++i)
 	{

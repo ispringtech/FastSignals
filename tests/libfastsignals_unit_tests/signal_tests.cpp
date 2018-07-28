@@ -5,7 +5,8 @@
 
 using namespace is::signals;
 
-TEST_CASE("Can connect a few slots and emit", "[signal]") {
+TEST_CASE("Can connect a few slots and emit", "[signal]")
+{
 	signal<void(int)> valueChanged;
 
 	int value1 = 0;
@@ -24,7 +25,8 @@ TEST_CASE("Can connect a few slots and emit", "[signal]") {
 	REQUIRE(value2 == 10);
 }
 
-TEST_CASE("Can disconnect slot with explicit call", "[signal]") {
+TEST_CASE("Can disconnect slot with explicit call", "[signal]")
+{
 	signal<void(int)> valueChanged;
 
 	int value1 = 0;
@@ -61,7 +63,8 @@ TEST_CASE("Can disconnect slot with explicit call", "[signal]") {
 	REQUIRE(value3 == 17);
 }
 
-TEST_CASE("Can disconnect slot with scoped_connection", "[signal]") {
+TEST_CASE("Can disconnect slot with scoped_connection", "[signal]")
+{
 	signal<void(int)> valueChanged;
 
 	int value1 = 0;
@@ -102,7 +105,8 @@ TEST_CASE("Can disconnect slot with scoped_connection", "[signal]") {
 	REQUIRE(value3 == 17);
 }
 
-TEST_CASE("Can disconnect all", "[signal]") {
+TEST_CASE("Can disconnect all", "[signal]")
+{
 	signal<void(int)> valueChanged;
 
 	int value1 = 0;
@@ -133,7 +137,8 @@ TEST_CASE("Can disconnect all", "[signal]") {
 	REQUIRE(value3 == 63);
 }
 
-TEST_CASE("Can disconnect inside slot", "[signal]") {
+TEST_CASE("Can disconnect inside slot", "[signal]")
+{
 	signal<void(int)> valueChanged;
 
 	int value1 = 0;
@@ -165,7 +170,8 @@ TEST_CASE("Can disconnect inside slot", "[signal]") {
 	REQUIRE(value3 == 101);
 }
 
-TEST_CASE("Disconnects OK if signal dead first", "[signal]") {
+TEST_CASE("Disconnects OK if signal dead first", "[signal]")
+{
 	connection conn2;
 	{
 		scoped_connection conn1;

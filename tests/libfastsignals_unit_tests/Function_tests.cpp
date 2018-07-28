@@ -84,34 +84,39 @@ private:
 	bool m_calledOnce = false;
 	std::string m_value;
 };
-}
+} // namespace
 
-TEST_CASE("Can use free function with 1 argument", "[function]") {
+TEST_CASE("Can use free function with 1 argument", "[function]")
+{
 	function<int(int)> fn = Abs;
 	REQUIRE(fn(10) == 10);
 	REQUIRE(fn(-10) == 10);
 	REQUIRE(fn(0) == 0);
 }
 
-TEST_CASE("Can use free function with 2 arguments", "[function]") {
+TEST_CASE("Can use free function with 2 arguments", "[function]")
+{
 	function<int(int, int)> fn = Sum;
 	REQUIRE(fn(10, 5) == 15);
 	REQUIRE(fn(-10, 0) == -10);
 }
 
-TEST_CASE("Can use free function without arguments", "[function]") {
+TEST_CASE("Can use free function without arguments", "[function]")
+{
 	function<std::string()> fn = GetStringHello;
 	REQUIRE(fn() == "hello");
 }
 
-TEST_CASE("Can use free function without return value", "[function]") {
+TEST_CASE("Can use free function without return value", "[function]")
+{
 	function<void(int&)> fn = InplaceAbs;
 	int a = -10;
 	fn(a);
 	REQUIRE(a == 10);
 }
 
-TEST_CASE("Can use lambda with 1 argument", "[function]") {
+TEST_CASE("Can use lambda with 1 argument", "[function]")
+{
 	function<int(int)> fn = [](int value) {
 		return Abs(value);
 	};
@@ -120,7 +125,8 @@ TEST_CASE("Can use lambda with 1 argument", "[function]") {
 	REQUIRE(fn(0) == 0);
 }
 
-TEST_CASE("Can use lambda with 2 arguments", "[function]") {
+TEST_CASE("Can use lambda with 2 arguments", "[function]")
+{
 	function<int(int, int)> fn = [](auto&& a, auto&& b) {
 		return Sum(a, b);
 	};
@@ -128,14 +134,16 @@ TEST_CASE("Can use lambda with 2 arguments", "[function]") {
 	REQUIRE(fn(-10, 0) == -10);
 }
 
-TEST_CASE("Can use lambda without arguments", "[function]") {
+TEST_CASE("Can use lambda without arguments", "[function]")
+{
 	function<std::string()> fn = [] {
 		return GetStringHello();
 	};
 	REQUIRE(fn() == "hello");
 }
 
-TEST_CASE("Can use lambda without return value", "[function]") {
+TEST_CASE("Can use lambda without return value", "[function]")
+{
 	bool calledOnce = false;
 	function<void(int&)> fn = [calledOnce](auto& value) mutable {
 		if (calledOnce)
@@ -150,28 +158,31 @@ TEST_CASE("Can use lambda without return value", "[function]") {
 	REQUIRE(a == 10);
 }
 
-TEST_CASE("Can use functor with 1 argument", "[function]") {
+TEST_CASE("Can use functor with 1 argument", "[function]")
+{
 	function<int(int)> fn = AbsFunctor();
 	REQUIRE(fn(10) == 10);
 	REQUIRE(fn(-10) == 10);
 	REQUIRE(fn(0) == 0);
 }
 
-TEST_CASE("Can use functor with 2 arguments", "[function]") {
+TEST_CASE("Can use functor with 2 arguments", "[function]")
+{
 	function<int(int, int)> fn = SumFunctor();
 	REQUIRE(fn(10, 5) == 15);
 	REQUIRE(fn(-10, 0) == -10);
 }
 
-TEST_CASE("Can use functor without arguments", "[function]") {
+TEST_CASE("Can use functor without arguments", "[function]")
+{
 	function<std::string()> fn = GetStringFunctor("hello");
 	REQUIRE(fn() == "hello");
 }
 
-TEST_CASE("Can use functor without return value", "[function]") {
+TEST_CASE("Can use functor without return value", "[function]")
+{
 	function<void(int&)> fn = InplaceAbsFunctor();
 	int a = -10;
 	fn(a);
 	REQUIRE(a == 10);
 }
-

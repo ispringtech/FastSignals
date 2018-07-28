@@ -3,9 +3,9 @@
 #include "catch2/catch.hpp"
 #include "libfastsignals/signal.h"
 #include <array>
-#include <vector>
 #include <mutex>
 #include <random>
+#include <vector>
 
 using namespace is::signals;
 
@@ -66,9 +66,10 @@ size_t get_random_index(size_t size)
 
 	return disconnectIndexDistribution(disconnectRandomEngine);
 }
-}
+} // namespace
 
-TEST_CASE("Can work in a few threads", "[signal]") {
+TEST_CASE("Can work in a few threads", "[signal]")
+{
 	constexpr unsigned fireThreadCount = 8;
 	constexpr unsigned signalsCount = 7;
 	constexpr unsigned fireCountPetThread = 100'000;

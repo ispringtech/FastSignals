@@ -4,7 +4,7 @@
 #include <SDKDDKVer.h>
 #endif
 
-#include <vector>
-#include <string>
-#include <memory>
 #include <functional>
+#include <memory>
+#include <string>
+#include <vector>

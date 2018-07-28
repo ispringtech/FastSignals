@@ -1,13 +1,13 @@
 #pragma once
 
-#include <memory>
 #include <atomic>
-#include <vector>
-#include <mutex>
+#include <cassert>
 #include <cstdint>
+#include <memory>
+#include <mutex>
 #include <stdexcept>
 #include <type_traits>
-#include <cassert>
+#include <vector>
 
 namespace is::signals::detail
 {
@@ -20,7 +20,7 @@ public:
 	virtual base_function_proxy* clone(void* buffer) const = 0;
 };
 
-template<class Signature>
+template <class Signature>
 class function_proxy;
 
 template <class Return, class... Arguments>
@@ -37,7 +37,7 @@ public:
 	static_assert(std::is_same_v<std::invoke_result_t<Function, Arguments...>, Return>,
 		"cannot construct function from non-callable or callable with different signature");
 
-	template<class FunctionObject>
+	template <class FunctionObject>
 	explicit function_proxy_impl(FunctionObject&& function)
 		: m_function(std::forward<FunctionObject>(function))
 	{
@@ -70,7 +70,7 @@ class free_function_proxy_impl final : public function_proxy<Return(Arguments...
 public:
 	static_assert(std::is_same_v<std::invoke_result_t<Function, Arguments...>, Return>, "cannot construct function from non-callable or callable with different signature");
 
-	template<class FunctionObject>
+	template <class FunctionObject>
 	explicit free_function_proxy_impl(FunctionObject&& function)
 		: m_function(std::forward<FunctionObject>(function))
 	{
@@ -115,7 +115,7 @@ public:
 			free_function_proxy_impl<Function, Return, Arguments...>,
 			function_proxy_impl<DecayFunction, Return, Arguments...>>;
 
-		base_function_proxy *proxy = nullptr;
+		base_function_proxy* proxy = nullptr;
 		if constexpr (sizeof(ProxyType) > function_buffer_size)
 		{
 			proxy = new ProxyType{ std::forward<Function>(function) };
@@ -128,7 +128,7 @@ public:
 		m_proxy = proxy;
 	}
 
-	template<class Signature>
+	template <class Signature>
 	const function_proxy<Signature>& get() const
 	{
 		return static_cast<const function_proxy<Signature>&>(unwrap());
@@ -152,7 +152,7 @@ public:
 
 	void remove_all();
 
-	template<class Signature, class ...Args>
+	template <class Signature, class... Args>
 	void invoke(Args... args) const
 	{
 		// TODO: (feature) add result combiners
@@ -176,4 +176,4 @@ private:
 using packed_function_storage_ptr = std::shared_ptr<packed_function_storage>;
 using packed_function_storage_weak_ptr = std::weak_ptr<packed_function_storage>;
 
-}
+} // namespace is::signals::detail

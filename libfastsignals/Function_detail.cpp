@@ -102,14 +102,14 @@ void packed_function_storage::remove(uint64_t id)
 {
 	// TODO: use binary search (ids array is always sorted)
 	std::lock_guard lock(m_mutex);
-	for (size_t i = 0, n = m_ids.size(); i < n; ++i)
+
+	// We use binary search because ids array is always sorted.
+	auto it = std::lower_bound(m_ids.begin(), m_ids.end(), id);
+	if (it != m_ids.end() && *it == id)
 	{
-		if (m_ids[i] == id)
-		{
-			m_ids.erase(m_ids.begin() + i);
-			m_functions.erase(m_functions.begin() + i);
-			break;
-		}
+		size_t i = std::distance(m_ids.begin(), it);
+		m_ids.erase(m_ids.begin() + i);
+		m_functions.erase(m_functions.begin() + i);
 	}
 }
 
@@ -126,4 +126,4 @@ std::vector<packed_function> packed_function_storage::get_functions() const
 	return m_functions;
 }
 
-}
+} // namespace is::signals::detail

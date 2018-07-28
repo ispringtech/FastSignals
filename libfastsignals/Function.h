@@ -5,7 +5,7 @@
 namespace is::signals
 {
 
-template<class Signature>
+template <class Signature>
 class function;
 
 // Compact function class - causes minimal code bloat when compiled.
@@ -37,4 +37,4 @@ private:
 	detail::packed_function m_packed;
 };
 
-}
+} // namespace is::signals

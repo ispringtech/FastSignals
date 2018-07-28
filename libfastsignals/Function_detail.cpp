@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "Function_detail.h"
 #include <algorithm>
+#include <cstddef>
 
 namespace is::signals::detail
 {

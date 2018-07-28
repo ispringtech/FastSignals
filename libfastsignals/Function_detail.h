@@ -37,9 +37,9 @@ public:
 	static_assert(std::is_same_v<std::invoke_result_t<Function, Arguments...>, Return>,
 		"cannot construct function from non-callable or callable with different signature");
 
-	template<class Function>
-	explicit function_proxy_impl(Function&& function)
-		: m_function(std::forward<Function>(function))
+	template<class FunctionObject>
+	explicit function_proxy_impl(FunctionObject&& function)
+		: m_function(std::forward<FunctionObject>(function))
 	{
 	}
 
@@ -70,9 +70,9 @@ class free_function_proxy_impl final : public function_proxy<Return(Arguments...
 public:
 	static_assert(std::is_same_v<std::invoke_result_t<Function, Arguments...>, Return>, "cannot construct function from non-callable or callable with different signature");
 
-	template<class Function>
-	explicit free_function_proxy_impl(Function&& function)
-		: m_function(std::forward<Function>(function))
+	template<class FunctionObject>
+	explicit free_function_proxy_impl(FunctionObject&& function)
+		: m_function(std::forward<FunctionObject>(function))
 	{
 	}
 

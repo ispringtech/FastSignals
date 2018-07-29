@@ -1,10 +1,10 @@
 #pragma once
 
 #include "function.h"
+#include <type_traits>
 
 namespace is::signals
 {
-
 // Connection keeps link between signal and slot and can disconnect them.
 // Disconnect operation is thread-safe: any thread can disconnect while
 //  slots called on other thread.
@@ -73,10 +73,10 @@ public:
 	}
 
 	scoped_connection(const scoped_connection&) = delete;
-	scoped_connection& operator =(const scoped_connection&) = delete;
+	scoped_connection& operator=(const scoped_connection&) = delete;
 	scoped_connection(scoped_connection&& other) = default;
 
-	scoped_connection& operator =(scoped_connection&& other)
+	scoped_connection& operator=(scoped_connection&& other)
 	{
 		disconnect();
 		static_cast<connection&>(*this) = std::move(other);
@@ -89,7 +89,22 @@ public:
 	}
 };
 
-template<class Signature>
+template <typename T>
+struct signal_arg
+{
+	using type = const T&;
+};
+
+template <typename U>
+struct signal_arg<U&>
+{
+	using type = U&;
+};
+
+template <typename T>
+using signal_arg_t = typename signal_arg<T>::type;
+
+template <class Signature>
 class signal;
 
 // Signal allows to fire events to many subscribers (slots).
@@ -99,8 +114,8 @@ template <class Return, class... Arguments>
 class signal<Return(Arguments...)>
 {
 public:
-	using signature_type = typename Return(Arguments...);
-	using slot_type = typename function<Return(const Arguments&...)>;
+	using signature_type = typename Return(signal_arg_t<Arguments>...);
+	using slot_type = typename function<signature_type>;
 
 	signal()
 		: m_slots(std::make_shared<detail::packed_function_storage>())
@@ -130,12 +145,12 @@ public:
 	 * operator(args...) calls all slots connected to this signal.
 	 * Logically, it fires signal emission event.
 	 */
-	void operator()(const Arguments&... args) const
+	void operator()(signal_arg_t<Arguments>... args) const
 	{
-		m_slots->invoke<Return(const Arguments&...), const Arguments&...>(args...);
+		m_slots->invoke<signature_type, signal_arg_t<Arguments>...>(args...);
 	}
 
 private:
 	detail::packed_function_storage_ptr m_slots;
 };
-}
+} // namespace is::signals

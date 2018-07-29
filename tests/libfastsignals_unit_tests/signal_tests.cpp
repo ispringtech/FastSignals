@@ -2,6 +2,7 @@
 
 #include "catch2/catch.hpp"
 #include "libfastsignals/signal.h"
+#include <string>
 
 using namespace is::signals;
 
@@ -24,6 +25,46 @@ TEST_CASE("Can connect a few slots and emit", "[signal]")
 	REQUIRE(value1 == 10);
 	REQUIRE(value2 == 10);
 }
+
+TEST_CASE("Can safely pass rvalues", "[signal]")
+{
+	const std::string expected = "If the type T is a reference type, provides the member typedef type which is the type referred to by T. Otherwise type is T.";;
+	std::string passedValue = expected;
+	signal<void(std::string)> valueChanged;
+
+	std::string value1;
+	std::string value2;
+	valueChanged.connect([&value1](std::string value) {
+		value1 = value;
+	});
+	valueChanged.connect([&value2](std::string value) {
+		value2 = value;
+	});
+
+	valueChanged(std::move(passedValue));
+	REQUIRE(value1 == expected);
+	REQUIRE(value2 == expected);
+}
+// TODO: remove pragmas when code generation bug will be fixed.
+#if defined(_MSC_VER)
+#pragma optimize("", off)
+#endif
+TEST_CASE("Can pass mutable ref", "[signal]")
+{
+	const std::string expected = "If the type T is a reference type, provides the member typedef type which is the type referred to by T. Otherwise type is T.";;
+	signal<void(std::string&)> valueChanged;
+
+	std::string passedValue;
+	valueChanged.connect([expected](std::string& value) {
+		value = expected;
+	});
+	valueChanged(passedValue);
+
+	REQUIRE(passedValue == expected);
+}
+#if defined(_MSC_VER)
+#pragma optimize("", on)
+#endif
 
 TEST_CASE("Can disconnect slot with explicit call", "[signal]")
 {

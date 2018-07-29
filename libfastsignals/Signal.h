@@ -1,6 +1,6 @@
 #pragma once
 
-#include "function.h"
+#include "Function.h"
 #include <type_traits>
 
 namespace is::signals
@@ -114,8 +114,8 @@ template <class Return, class... Arguments>
 class signal<Return(Arguments...)>
 {
 public:
-	using signature_type = typename Return(signal_arg_t<Arguments>...);
-	using slot_type = typename function<signature_type>;
+	using signature_type = Return(signal_arg_t<Arguments>...);
+	using slot_type = function<signature_type>;
 
 	signal()
 		: m_slots(std::make_shared<detail::packed_function_storage>())

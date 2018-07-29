@@ -1,7 +1,7 @@
 #include "stdafx.h"
 
 #include "catch2/catch.hpp"
-#include "libfastsignals/signal.h"
+#include "libfastsignals/Signal.h"
 #include <string>
 
 using namespace is::signals;
@@ -44,7 +44,7 @@ TEST_CASE("Can safely pass rvalues", "[signal]")
 	valueChanged(std::move(passedValue));
 	REQUIRE(value1 == expected);
 	REQUIRE(value2 == expected);
-}
+}
 // TODO: remove pragmas when code generation bug will be fixed.
 #if defined(_MSC_VER)
 #pragma optimize("", off)

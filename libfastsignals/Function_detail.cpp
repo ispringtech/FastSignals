@@ -28,9 +28,10 @@ packed_function& packed_function::operator=(packed_function&& other)
 {
 	if (other.is_buffer_allocated())
 	{
-		auto* proxy = other.m_proxy->clone(&m_buffer);
+		// There are no strong exception safety since we cannot allocate
+		//  new object on buffer and than reset same buffer.
 		reset();
-		m_proxy = proxy;
+		m_proxy = other.m_proxy->clone(&m_buffer);
 	}
 	else
 	{
@@ -53,7 +54,10 @@ packed_function::~packed_function() noexcept
 	reset();
 }
 
+// TODO: remove pragmas when code generation bug will be fixed.
+#if defined(_MSC_VER)
 #pragma optimize("", off)
+#endif
 void packed_function::reset() noexcept
 {
 	if (m_proxy != nullptr)
@@ -69,7 +73,9 @@ void packed_function::reset() noexcept
 		m_proxy = nullptr;
 	}
 }
+#if defined(_MSC_VER)
 #pragma optimize("", on)
+#endif
 
 base_function_proxy& packed_function::unwrap() const
 {

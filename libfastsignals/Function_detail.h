@@ -137,7 +137,7 @@ public:
 private:
 	void reset() noexcept;
 	base_function_proxy& unwrap() const;
-	bool is_buffer_allocated() const;
+	bool is_buffer_allocated() const noexcept;
 
 	base_function_proxy* m_proxy = nullptr;
 	std::aligned_storage_t<function_buffer_size> m_buffer;
@@ -148,9 +148,9 @@ class packed_function_storage
 public:
 	uint64_t add(packed_function fn);
 
-	void remove(uint64_t id);
+	void remove(uint64_t id) noexcept;
 
-	void remove_all();
+	void remove_all() noexcept;
 
 	template <class Signature, class... Args>
 	void invoke(Args... args) const
@@ -165,10 +165,12 @@ public:
 	}
 
 private:
-	std::vector<packed_function> get_functions() const;
+	using VectorT = std::vector<packed_function>;
+
+	VectorT get_functions() const;
 
 	mutable std::mutex m_mutex;
-	std::vector<packed_function> m_functions;
+	VectorT m_functions;
 	std::vector<uint64_t> m_ids;
 	uint64_t m_nextId = 0;
 };

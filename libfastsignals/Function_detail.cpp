@@ -80,7 +80,7 @@ base_function_proxy& packed_function::unwrap() const
 	return *m_proxy;
 }
 
-bool packed_function::is_buffer_allocated() const
+bool packed_function::is_buffer_allocated() const noexcept
 {
 	const std::byte* bufferStart = reinterpret_cast<const std::byte*>(&m_buffer);
 	const std::byte* bufferEnd = reinterpret_cast<const std::byte*>(&m_buffer + 1);
@@ -98,7 +98,7 @@ uint64_t packed_function_storage::add(packed_function fn)
 	return id;
 }
 
-void packed_function_storage::remove(uint64_t id)
+void packed_function_storage::remove(uint64_t id) noexcept
 {
 	// TODO: use binary search (ids array is always sorted)
 	std::lock_guard lock(m_mutex);
@@ -113,14 +113,14 @@ void packed_function_storage::remove(uint64_t id)
 	}
 }
 
-void packed_function_storage::remove_all()
+void packed_function_storage::remove_all() noexcept
 {
 	std::lock_guard lock(m_mutex);
 	m_functions.clear();
 	m_ids.clear();
 }
 
-std::vector<packed_function> packed_function_storage::get_functions() const
+packed_function_storage::VectorT packed_function_storage::get_functions() const
 {
 	std::lock_guard lock(m_mutex);
 	return m_functions;

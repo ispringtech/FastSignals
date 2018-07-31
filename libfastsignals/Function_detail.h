@@ -1,11 +1,8 @@
 #pragma once
 
-#include <atomic>
-#include <cassert>
+#include "spin_mutex.h"
 #include <cstdint>
 #include <memory>
-#include <mutex>
-#include <stdexcept>
 #include <type_traits>
 #include <vector>
 
@@ -156,21 +153,21 @@ public:
 	void invoke(Args... args) const
 	{
 		// TODO: (feature) add result combiners
-		// TODO: (optimization) implement copy-on-write for functions array to avoid unnecessary copying on emit.
-		// TODO: (optimization) remove loop traversing from template code (use FunctionView).
-		for (auto&& function : get_functions())
+
+		packed_function slot;
+		size_t slotIndex = static_cast<size_t>(-1);
+		uint64_t slotId = 0;
+		while (get_next_slot(slot, slotIndex, slotId))
 		{
-			function.get<Signature>()(args...);
+			slot.get<Signature>()(args...);
 		}
 	}
 
 private:
-	using VectorT = std::vector<packed_function>;
+	bool get_next_slot(packed_function& slot, size_t& expectedIndex, uint64_t& nextId) const;
 
-	VectorT get_functions() const;
-
-	mutable std::mutex m_mutex;
-	VectorT m_functions;
+	mutable spin_mutex m_mutex;
+	std::vector<packed_function> m_functions;
 	std::vector<uint64_t> m_ids;
 	uint64_t m_nextId = 0;
 };

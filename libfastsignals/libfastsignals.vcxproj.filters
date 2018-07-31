@@ -5,6 +5,7 @@
     <ClInclude Include="function_detail.h" />
     <ClInclude Include="function.h" />
     <ClInclude Include="signal.h" />
+    <ClInclude Include="spin_mutex.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />

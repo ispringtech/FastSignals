@@ -166,6 +166,7 @@
     <ClInclude Include="function.h" />
     <ClInclude Include="function_detail.h" />
     <ClInclude Include="signal.h" />
+    <ClInclude Include="spin_mutex.h" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <ItemGroup>

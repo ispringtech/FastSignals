@@ -1,10 +1,7 @@
 #pragma once
 
-#include "spin_mutex.h"
 #include <cstdint>
-#include <memory>
 #include <type_traits>
-#include <vector>
 
 namespace is::signals::detail
 {
@@ -139,40 +136,5 @@ private:
 	base_function_proxy* m_proxy = nullptr;
 	std::aligned_storage_t<function_buffer_size> m_buffer;
 };
-
-class packed_function_storage
-{
-public:
-	uint64_t add(packed_function fn);
-
-	void remove(uint64_t id) noexcept;
-
-	void remove_all() noexcept;
-
-	template <class Signature, class... Args>
-	void invoke(Args... args) const
-	{
-		// TODO: (feature) add result combiners
-
-		packed_function slot;
-		size_t slotIndex = static_cast<size_t>(-1);
-		uint64_t slotId = 0;
-		while (get_next_slot(slot, slotIndex, slotId))
-		{
-			slot.get<Signature>()(args...);
-		}
-	}
-
-private:
-	bool get_next_slot(packed_function& slot, size_t& expectedIndex, uint64_t& nextId) const;
-
-	mutable spin_mutex m_mutex;
-	std::vector<packed_function> m_functions;
-	std::vector<uint64_t> m_ids;
-	uint64_t m_nextId = 0;
-};
-
-using packed_function_storage_ptr = std::shared_ptr<packed_function_storage>;
-using packed_function_storage_weak_ptr = std::weak_ptr<packed_function_storage>;
 
 } // namespace is::signals::detail

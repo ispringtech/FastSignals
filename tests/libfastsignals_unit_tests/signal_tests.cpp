@@ -28,7 +28,8 @@ TEST_CASE("Can connect a few slots and emit", "[signal]")
 
 TEST_CASE("Can safely pass rvalues", "[signal]")
 {
-	const std::string expected = "If the type T is a reference type, provides the member typedef type which is the type referred to by T. Otherwise type is T.";;
+	const std::string expected = "If the type T is a reference type, provides the member typedef type which is the type referred to by T. Otherwise type is T.";
+	;
 	std::string passedValue = expected;
 	signal<void(std::string)> valueChanged;
 
@@ -51,7 +52,8 @@ TEST_CASE("Can safely pass rvalues", "[signal]")
 #endif
 TEST_CASE("Can pass mutable ref", "[signal]")
 {
-	const std::string expected = "If the type T is a reference type, provides the member typedef type which is the type referred to by T. Otherwise type is T.";;
+	const std::string expected = "If the type T is a reference type, provides the member typedef type which is the type referred to by T. Otherwise type is T.";
+	;
 	signal<void(std::string&)> valueChanged;
 
 	std::string passedValue;
@@ -225,6 +227,30 @@ TEST_CASE("Disconnects OK if signal dead first", "[signal]")
 			});
 			conn1 = valueChanged.connect([](int) {
 			});
+		}
+		conn2.disconnect();
+	}
+	conn2.disconnect();
+}
+
+TEST_CASE("Returns last called slot result with default combiner", "[signal]")
+{
+	connection conn2;
+	{
+		scoped_connection conn1;
+		{
+			signal<int(int)> absSignal;
+			conn2 = absSignal.connect([](int value) {
+				return value * value;
+			});
+			conn1 = absSignal.connect([](int value) {
+				return abs(value);
+			});
+
+			REQUIRE(absSignal(45) == 45);
+			REQUIRE(absSignal(-1) == 1);
+			REQUIRE(absSignal(-177) == 177);
+			REQUIRE(absSignal(0) == 0);
 		}
 		conn2.disconnect();
 	}

@@ -163,14 +163,17 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="combiners.h" />
     <ClInclude Include="function.h" />
     <ClInclude Include="function_detail.h" />
     <ClInclude Include="signal.h" />
+    <ClInclude Include="signal_impl.h" />
     <ClInclude Include="spin_mutex.h" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="function_detail.cpp" />
+    <ClCompile Include="signal_impl.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

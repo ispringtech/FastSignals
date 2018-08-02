@@ -1,6 +1,8 @@
 #pragma once
 
 #include "Function.h"
+#include "combiners.h"
+#include "signal_impl.h"
 #include <type_traits>
 
 namespace is::signals
@@ -15,7 +17,7 @@ class connection
 public:
 	connection() = default;
 
-	explicit connection(detail::packed_function_storage_weak_ptr storage, uint64_t id)
+	explicit connection(detail::signal_impl_weak_ptr storage, uint64_t id)
 		: m_storage(std::move(storage))
 		, m_id(id)
 	{
@@ -51,7 +53,7 @@ public:
 	}
 
 protected:
-	detail::packed_function_storage_weak_ptr m_storage;
+	detail::signal_impl_weak_ptr m_storage;
 	uint64_t m_id = 0;
 };
 
@@ -104,21 +106,23 @@ struct signal_arg<U&>
 template <typename T>
 using signal_arg_t = typename signal_arg<T>::type;
 
-template <class Signature>
+template <class Signature, template <class T> class Combiner = optional_last_value>
 class signal;
 
 // Signal allows to fire events to many subscribers (slots).
 // In other words, it implements one-to-many relation between event and listeners.
 // Signal implements observable object from Observable pattern.
-template <class Return, class... Arguments>
-class signal<Return(Arguments...)>
+template <class Return, class... Arguments, template <class T> class Combiner>
+class signal<Return(Arguments...), Combiner>
 {
 public:
 	using signature_type = Return(signal_arg_t<Arguments>...);
 	using slot_type = function<signature_type>;
+	using combiner_type = Combiner<Return>;
+	using result_type = typename combiner_type::result_type;
 
 	signal()
-		: m_slots(std::make_shared<detail::packed_function_storage>())
+		: m_slots(std::make_shared<detail::signal_impl>())
 	{
 	}
 
@@ -145,12 +149,12 @@ public:
 	 * operator(args...) calls all slots connected to this signal.
 	 * Logically, it fires signal emission event.
 	 */
-	void operator()(signal_arg_t<Arguments>... args) const
+	result_type operator()(signal_arg_t<Arguments>... args) const
 	{
-		m_slots->invoke<signature_type, signal_arg_t<Arguments>...>(args...);
+		return m_slots->invoke<combiner_type, result_type, signature_type, signal_arg_t<Arguments>...>(args...);
 	}
 
 private:
-	detail::packed_function_storage_ptr m_slots;
+	detail::signal_impl_ptr m_slots;
 };
 } // namespace is::signals

@@ -5,6 +5,7 @@
 
 namespace
 {
+unsigned kBenchMinConnections = 0;
 unsigned kBenchMaxConnections = 8;
 unsigned kBenchEmitCount = 987;
 } // namespace
@@ -15,7 +16,7 @@ void emit_fastsignals(benchmark::State& state)
 	for (auto _ : state)
 	{
 		volatile int savedValue = 0;
-		for (unsigned connCount = 0; connCount < kBenchMaxConnections; ++connCount)
+		for (unsigned connCount = 0; connCount < state.range(); ++connCount)
 		{
 			signal<void(int)> valueChanged;
 			for (unsigned i = 0; i < connCount; ++i)
@@ -38,7 +39,7 @@ void emit_boost(benchmark::State& state)
 	for (auto _ : state)
 	{
 		volatile int savedValue = 0;
-		for (unsigned connCount = 0; connCount < kBenchMaxConnections; ++connCount)
+		for (unsigned connCount = 0; connCount < state.range(); ++connCount)
 		{
 			signal<void(int)> valueChanged;
 			for (unsigned i = 0; i < connCount; ++i)
@@ -55,5 +56,5 @@ void emit_boost(benchmark::State& state)
 	}
 }
 
-BENCHMARK(emit_boost)->Iterations(50);
-BENCHMARK(emit_fastsignals)->Iterations(50);
+BENCHMARK(emit_boost)->Range(kBenchMinConnections, kBenchMaxConnections)->Iterations(150);
+BENCHMARK(emit_fastsignals)->Range(kBenchMinConnections, kBenchMaxConnections)->Iterations(150);

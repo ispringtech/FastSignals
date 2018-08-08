@@ -8,6 +8,8 @@
     <ClInclude Include="spin_mutex.h" />
     <ClInclude Include="combiners.h" />
     <ClInclude Include="signal_impl.h" />
+    <ClInclude Include="connection.h" />
+    <ClInclude Include="type_traits.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />

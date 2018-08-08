@@ -2,123 +2,26 @@
 
 #include "Function.h"
 #include "combiners.h"
+#include "connection.h"
 #include "signal_impl.h"
+#include "type_traits.h"
 #include <type_traits>
 
 namespace is::signals
 {
-// Connection keeps link between signal and slot and can disconnect them.
-// Disconnect operation is thread-safe: any thread can disconnect while
-//  slots called on other thread.
-// This class itself is not thread-safe: you can't use the same connection
-//  object from different threads at the same time.
-class connection
-{
-public:
-	connection() = default;
-
-	explicit connection(detail::signal_impl_weak_ptr storage, uint64_t id)
-		: m_storage(std::move(storage))
-		, m_id(id)
-	{
-	}
-
-	connection(const connection& other) = default;
-	connection& operator=(const connection& other) = default;
-
-	connection(connection&& other)
-		: m_storage(other.m_storage)
-		, m_id(other.m_id)
-	{
-		other.m_storage.reset();
-		other.m_id = 0;
-	}
-
-	connection& operator=(connection&& other)
-	{
-		m_storage = other.m_storage;
-		m_id = other.m_id;
-		other.m_storage.reset();
-		other.m_id = 0;
-		return *this;
-	}
-
-	void disconnect()
-	{
-		if (auto storage = m_storage.lock())
-		{
-			storage->remove(m_id);
-			m_storage.reset();
-		}
-	}
-
-protected:
-	detail::signal_impl_weak_ptr m_storage;
-	uint64_t m_id = 0;
-};
-
-// Scoped connection keeps link between signal and slot and disconnects them in destructor.
-// Scoped connection is movable, but not copyable.
-class scoped_connection : public connection
-{
-public:
-	scoped_connection() = default;
-
-	scoped_connection(const connection& conn)
-		: connection(conn)
-	{
-	}
-
-	scoped_connection(connection&& conn)
-		: connection(std::move(conn))
-	{
-	}
-
-	scoped_connection(const scoped_connection&) = delete;
-	scoped_connection& operator=(const scoped_connection&) = delete;
-	scoped_connection(scoped_connection&& other) = default;
-
-	scoped_connection& operator=(scoped_connection&& other)
-	{
-		disconnect();
-		static_cast<connection&>(*this) = std::move(other);
-		return *this;
-	}
-
-	~scoped_connection()
-	{
-		disconnect();
-	}
-};
-
-template <typename T>
-struct signal_arg
-{
-	using type = const T&;
-};
-
-template <typename U>
-struct signal_arg<U&>
-{
-	using type = U&;
-};
-
-template <typename T>
-using signal_arg_t = typename signal_arg<T>::type;
-
-template <class Signature, template <class T> class Combiner = optional_last_value>
+template <class Signature, class Combiner = optional_last_value<signature_result_t<Signature>>>
 class signal;
 
 // Signal allows to fire events to many subscribers (slots).
 // In other words, it implements one-to-many relation between event and listeners.
 // Signal implements observable object from Observable pattern.
-template <class Return, class... Arguments, template <class T> class Combiner>
+template <class Return, class... Arguments, class Combiner>
 class signal<Return(Arguments...), Combiner>
 {
 public:
 	using signature_type = Return(signal_arg_t<Arguments>...);
 	using slot_type = function<signature_type>;
-	using combiner_type = Combiner<Return>;
+	using combiner_type = Combiner;
 	using result_type = typename combiner_type::result_type;
 
 	signal()

@@ -46,6 +46,7 @@ public:
 	{
 		if constexpr (sizeof(*this) > function_buffer_size)
 		{
+			(void)buffer;
 			return new function_proxy_impl(*this);
 		}
 		else

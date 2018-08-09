@@ -186,3 +186,20 @@ TEST_CASE("Can use functor without return value", "[function]")
 	fn(a);
 	REQUIRE(a == 10);
 }
+
+TEST_CASE("Can construct function with cons std::function<>&", "[function]")
+{
+	using BoolCallback = std::function<void(bool succeed)>;
+	bool value = false;
+	const BoolCallback& cb = [&value](bool succeed) {
+		value = succeed;
+	};
+
+	function<void(bool)> fn = cb;
+	fn(true);
+	REQUIRE(value == true);
+	fn(false);
+	REQUIRE(value == false);
+	fn(true);
+	REQUIRE(value == true);
+}

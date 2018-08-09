@@ -105,7 +105,7 @@ public:
 	template <class Function, class Return, class... Arguments>
 	void init(Function&& function)
 	{
-		using DecayFunction = typename std::remove_reference_t<std::remove_cv_t<Function>>;
+		using DecayFunction = typename std::remove_cv_t<std::remove_reference_t<Function>>;
 		using ProxyType = typename std::conditional_t<std::is_function_v<DecayFunction>,
 			free_function_proxy_impl<Function, Return, Arguments...>,
 			function_proxy_impl<DecayFunction, Return, Arguments...>>;

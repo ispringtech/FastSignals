@@ -173,7 +173,7 @@ TEST_CASE("Can disconnect all", "[signal]")
 	REQUIRE(value2 == 63);
 	REQUIRE(value3 == 63);
 
-	valueChanged.disconnect_all();
+	valueChanged.disconnect_all_slots();
 	valueChanged(101);
 	REQUIRE(value1 == 63);
 	REQUIRE(value2 == 63);

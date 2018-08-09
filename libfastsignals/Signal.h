@@ -41,9 +41,9 @@ public:
 	}
 
 	/**
-	 * disconnect_all() method disconnects all slots from signal emission event.
+	 * disconnect_all_slots() method disconnects all slots from signal emission event.
 	 */
-	void disconnect_all()
+	void disconnect_all_slots()
 	{
 		m_slots->remove_all();
 	}

@@ -25,6 +25,9 @@
     <ClInclude Include="include/type_traits.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="include\msvc_autolink.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="include">

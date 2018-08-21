@@ -6,6 +6,30 @@
 
 using namespace is::signals;
 
+namespace
+{
+template<class T, typename = std::enable_if_t<std::is_same_v<T, bool>>>
+class any_of_combiner
+{
+public:
+	using result_type = bool;
+
+	template <class TRef>
+	void operator()(TRef&& value)
+	{
+		m_result = m_result || bool(value);
+	}
+
+	result_type get_value() const
+	{
+		return m_result;
+	}
+
+private:
+	result_type m_result = {};
+};
+}
+
 TEST_CASE("Can connect a few slots and emit", "[signal]")
 {
 	signal<void(int)> valueChanged;
@@ -29,7 +53,6 @@ TEST_CASE("Can connect a few slots and emit", "[signal]")
 TEST_CASE("Can safely pass rvalues", "[signal]")
 {
 	const std::string expected = "If the type T is a reference type, provides the member typedef type which is the type referred to by T. Otherwise type is T.";
-	;
 	std::string passedValue = expected;
 	signal<void(std::string)> valueChanged;
 
@@ -246,6 +269,7 @@ TEST_CASE("Returns last called slot result with default combiner", "[signal]")
 			conn1 = absSignal.connect([](int value) {
 				return abs(value);
 			});
+			absSignal(-1);
 
 			REQUIRE(absSignal(45) == 45);
 			REQUIRE(absSignal(-1) == 1);
@@ -255,4 +279,26 @@ TEST_CASE("Returns last called slot result with default combiner", "[signal]")
 		conn2.disconnect();
 	}
 	conn2.disconnect();
+}
+
+TEST_CASE("Works with custom any_of combiner", "[signal]")
+{
+	using cancellable_signal = signal<bool(std::string), any_of_combiner<bool>>;
+	cancellable_signal startRequested;
+	auto conn1 = startRequested.connect([](std::string op) {
+		return op == "1";
+	});
+	auto conn2 = startRequested.connect([](std::string op) {
+		return op == "1" || op == "2";
+	});
+	REQUIRE(startRequested("0") == false);
+	REQUIRE(startRequested("1") == true);
+	REQUIRE(startRequested("2") == true);
+	REQUIRE(startRequested("3") == false);
+	conn1.disconnect();
+	conn2.disconnect();
+	REQUIRE(startRequested("0") == false);
+	REQUIRE(startRequested("1") == false);
+	REQUIRE(startRequested("2") == false);
+	REQUIRE(startRequested("3") == false);
 }

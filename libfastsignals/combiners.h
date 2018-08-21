@@ -17,10 +17,9 @@ public:
 	using result_type = std::optional<T>;
 
 	template <class TRef>
-	bool operator()(TRef&& value)
+	void operator()(TRef&& value)
 	{
 		m_result = std::forward<TRef>(value);
-		return true;
 	}
 
 	result_type get_value() const
@@ -29,7 +28,7 @@ public:
 	}
 
 private:
-	result_type m_result;
+	result_type m_result = {};
 };
 
 template <>

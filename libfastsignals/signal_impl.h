@@ -38,10 +38,7 @@ public:
 			Combiner combiner;
 			while (get_next_slot(slot, slotIndex, slotId))
 			{
-				if (!combiner(slot.get<Signature>()(args...)))
-				{
-					break;
-				}
+				combiner(slot.get<Signature>()(args...));
 			}
 			return combiner.get_value();
 		}

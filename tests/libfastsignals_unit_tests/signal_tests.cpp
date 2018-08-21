@@ -249,7 +249,11 @@ TEST_CASE("Disconnects OK if signal dead first", "[signal]")
 			conn1 = valueChanged.connect([](int) {
 			});
 		}
+		REQUIRE(conn2.connected());
+		REQUIRE(conn1.connected());
 		conn2.disconnect();
+		REQUIRE(!conn2.connected());
+		REQUIRE(conn1.connected());
 	}
 	conn2.disconnect();
 }
@@ -274,9 +278,12 @@ TEST_CASE("Returns last called slot result with default combiner", "[signal]")
 			REQUIRE(absSignal(-177) == 177);
 			REQUIRE(absSignal(0) == 0);
 		}
+		REQUIRE(conn2.connected());
 		conn2.disconnect();
+		REQUIRE(!conn2.connected());
 	}
 	conn2.disconnect();
+	REQUIRE(!conn2.connected());
 }
 
 TEST_CASE("Works with custom any_of combiner", "[signal]")
@@ -299,4 +306,48 @@ TEST_CASE("Works with custom any_of combiner", "[signal]")
 	REQUIRE(startRequested("1") == false);
 	REQUIRE(startRequested("2") == false);
 	REQUIRE(startRequested("3") == false);
+}
+
+TEST_CASE("Can release scoped connection", "[signal]")
+{
+	int value2 = 0;
+	int value3 = 0;
+	signal<void(int)> valueChanged;
+	connection conn1;
+	{
+		scoped_connection conn2;
+		scoped_connection conn3;
+		conn2 = valueChanged.connect([&value2](int x) {
+			value2 = x;
+		});
+		conn3 = valueChanged.connect([&value3](int x) {
+			value3 = x;
+		});
+
+		valueChanged(42);
+		REQUIRE(value2 == 42);
+		REQUIRE(value3 == 42);
+		REQUIRE(conn2.connected());
+		REQUIRE(conn3.connected());
+		REQUIRE(!conn1.connected());
+
+		conn1 = conn3.release();
+		REQUIRE(conn2.connected());
+		REQUIRE(!conn3.connected());
+		REQUIRE(conn1.connected());
+		valueChanged(144);
+		REQUIRE(value2 == 144);
+		REQUIRE(value3 == 144);
+	}
+
+	// conn2 disconnected, conn1 connected.
+	valueChanged(17);
+	REQUIRE(value2 == 144);
+	REQUIRE(value3 == 17);
+	REQUIRE(conn1.connected());
+
+	conn1.disconnect();
+	valueChanged(90);
+	REQUIRE(value2 == 144);
+	REQUIRE(value3 == 17);
 }

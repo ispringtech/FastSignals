@@ -50,7 +50,7 @@ private:
 	mutable spin_mutex m_mutex;
 	std::vector<packed_function> m_functions;
 	std::vector<uint64_t> m_ids;
-	uint64_t m_nextId = 0;
+	uint64_t m_nextId = 1;
 };
 
 using signal_impl_ptr = std::shared_ptr<signal_impl>;

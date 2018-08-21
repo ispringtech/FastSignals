@@ -41,13 +41,19 @@ public:
 		return *this;
 	}
 
+	bool connected() const noexcept
+	{
+		return (m_id != 0);
+	}
+
 	void disconnect()
 	{
 		if (auto storage = m_storage.lock())
 		{
 			storage->remove(m_id);
-			m_storage.reset();
 		}
+		m_storage.reset();
+		m_id = 0;
 	}
 
 protected:
@@ -86,6 +92,12 @@ public:
 	~scoped_connection()
 	{
 		disconnect();
+	}
+
+	connection release()
+	{
+		connection conn = std::move(static_cast<connection&>(*this));
+		return conn;
 	}
 };
 

@@ -1,5 +1,4 @@
-#include "stdafx.h"
-#include "signal_impl.h"
+#include "../include/signal_impl.h"
 #include <algorithm>
 #include <mutex>
 

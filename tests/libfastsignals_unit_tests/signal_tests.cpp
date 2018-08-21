@@ -1,7 +1,5 @@
-#include "stdafx.h"
-
 #include "catch2/catch.hpp"
-#include "libfastsignals/Signal.h"
+#include "libfastsignals/include/signal.h"
 #include <string>
 
 using namespace is::signals;

@@ -1,5 +1,4 @@
-#include "stdafx.h"
-#include "libfastsignals/signal.h"
+#include "libfastsignals/include/signal.h"
 #include <benchmark/benchmark.h>
 #include <boost/signals2.hpp>
 

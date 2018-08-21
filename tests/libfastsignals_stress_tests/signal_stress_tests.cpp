@@ -1,7 +1,5 @@
-#include "stdafx.h"
-
 #include "catch2/catch.hpp"
-#include "libfastsignals/signal.h"
+#include "libfastsignals/include/signal.h"
 #include <array>
 #include <mutex>
 #include <random>

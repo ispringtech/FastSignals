@@ -281,7 +281,7 @@ TEST_CASE("Returns last called slot result with default combiner", "[signal]")
 
 TEST_CASE("Works with custom any_of combiner", "[signal]")
 {
-	using cancellable_signal = signal<bool(std::string), any_of_combiner<bool>>;
+	using cancellable_signal = signal<bool(std::string), any_of_combiner>;
 	cancellable_signal startRequested;
 	auto conn1 = startRequested.connect([](std::string op) {
 		return op == "1";

@@ -9,19 +9,19 @@
 
 namespace is::signals
 {
-template <class Signature, class Combiner = optional_last_value<signature_result_t<Signature>>>
+template <class Signature, template <class T> class Combiner = optional_last_value>
 class signal;
 
 // Signal allows to fire events to many subscribers (slots).
 // In other words, it implements one-to-many relation between event and listeners.
 // Signal implements observable object from Observable pattern.
-template <class Return, class... Arguments, class Combiner>
+template <class Return, class... Arguments, template <class T> class Combiner>
 class signal<Return(Arguments...), Combiner>
 {
 public:
 	using signature_type = Return(signal_arg_t<Arguments>...);
 	using slot_type = function<signature_type>;
-	using combiner_type = Combiner;
+	using combiner_type = Combiner<Return>;
 	using result_type = typename combiner_type::result_type;
 
 	signal()

@@ -28,8 +28,10 @@ template <class Function, class Return, class... Arguments>
 class function_proxy_impl final : public function_proxy<Return(Arguments...)>
 {
 public:
+	// If you see this error, probably your function returns value and you're trying to
+	//  connect it to `signal<void(...)>`. Just remove return value from callback.
 	static_assert(std::is_same_v<std::invoke_result_t<Function, Arguments...>, Return>,
-		"cannot construct function from non-callable or callable with different signature");
+		"cannot construct function<> class from callable object with different return type");
 
 	template <class FunctionObject>
 	explicit function_proxy_impl(FunctionObject&& function)
@@ -63,7 +65,10 @@ template <class Function, class Return, class... Arguments>
 class free_function_proxy_impl final : public function_proxy<Return(Arguments...)>
 {
 public:
-	static_assert(std::is_same_v<std::invoke_result_t<Function, Arguments...>, Return>, "cannot construct function from non-callable or callable with different signature");
+	// If you see this error, probably your function returns value and you're trying to
+	//  connect it to `signal<void(...)>`. Just remove return value from callback.
+	static_assert(std::is_same_v<std::invoke_result_t<Function, Arguments...>, Return>,
+		"cannot construct function<> class from free function with different return type");
 
 	template <class FunctionObject>
 	explicit free_function_proxy_impl(FunctionObject&& function)

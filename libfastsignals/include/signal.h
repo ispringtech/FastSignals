@@ -7,6 +7,10 @@
 #include "type_traits.h"
 #include <type_traits>
 
+#if defined(_MSC_VER)
+#	include "msvc_autolink.h"
+#endif
+
 namespace is::signals
 {
 template <class Signature, template <class T> class Combiner = optional_last_value>

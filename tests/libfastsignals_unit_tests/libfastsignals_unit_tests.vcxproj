@@ -179,6 +179,7 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="bind_weak_tests.cpp" />
     <ClCompile Include="function_tests.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="signal_tests.cpp" />

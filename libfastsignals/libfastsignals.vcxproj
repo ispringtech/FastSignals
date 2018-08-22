@@ -179,6 +179,7 @@
     <ClInclude Include="include/signal_impl.h" />
     <ClInclude Include="include/spin_mutex.h" />
     <ClInclude Include="include/type_traits.h" />
+    <ClInclude Include="include\bind_weak.h" />
     <ClInclude Include="include\msvc_autolink.h" />
   </ItemGroup>
   <ItemGroup>

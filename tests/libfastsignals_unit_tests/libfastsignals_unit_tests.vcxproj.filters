@@ -4,5 +4,6 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="signal_tests.cpp" />
     <ClCompile Include="function_tests.cpp" />
+    <ClCompile Include="bind_weak_tests.cpp" />
   </ItemGroup>
 </Project>

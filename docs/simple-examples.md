@@ -1,5 +1,7 @@
 # Simple Examples
 
+>If you are not familar with Boost.Signals2, please read [Boost.Signals2: Connections](https://theboostcpplibraries.com/boost.signals2-connections)
+
 ## Example with signal&lt;&gt; and connection
 
 ```cpp

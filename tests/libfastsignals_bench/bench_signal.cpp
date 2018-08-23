@@ -4,8 +4,6 @@
 
 namespace
 {
-unsigned kBenchMinConnections = 0;
-unsigned kBenchMaxConnections = 8;
 unsigned kBenchEmitCount = 987;
 } // namespace
 
@@ -55,5 +53,5 @@ void emit_boost(benchmark::State& state)
 	}
 }
 
-BENCHMARK(emit_boost)->Range(kBenchMinConnections, kBenchMaxConnections)->Iterations(150);
-BENCHMARK(emit_fastsignals)->Range(kBenchMinConnections, kBenchMaxConnections)->Iterations(150);
+BENCHMARK(emit_boost)->Range(0, 8)->Iterations(1000);
+BENCHMARK(emit_fastsignals)->Range(0, 8)->Iterations(1000);

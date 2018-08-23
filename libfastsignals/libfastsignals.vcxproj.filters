@@ -47,5 +47,8 @@
     <ClCompile Include="src\signal_impl.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\connection.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

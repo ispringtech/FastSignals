@@ -183,6 +183,7 @@
     <ClInclude Include="include\msvc_autolink.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\connection.cpp" />
     <ClCompile Include="src\function_detail.cpp" />
     <ClCompile Include="src\signal_impl.cpp" />
   </ItemGroup>

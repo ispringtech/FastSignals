@@ -14,47 +14,14 @@ class connection
 {
 public:
 	connection() = default;
-
-	explicit connection(detail::signal_impl_weak_ptr storage, uint64_t id)
-		: m_storage(std::move(storage))
-		, m_id(id)
-	{
-	}
-
+	explicit connection(detail::signal_impl_weak_ptr storage, uint64_t id);
 	connection(const connection& other) = default;
 	connection& operator=(const connection& other) = default;
+	connection(connection&& other);
+	connection& operator=(connection&& other);
 
-	connection(connection&& other)
-		: m_storage(other.m_storage)
-		, m_id(other.m_id)
-	{
-		other.m_storage.reset();
-		other.m_id = 0;
-	}
-
-	connection& operator=(connection&& other)
-	{
-		m_storage = other.m_storage;
-		m_id = other.m_id;
-		other.m_storage.reset();
-		other.m_id = 0;
-		return *this;
-	}
-
-	bool connected() const noexcept
-	{
-		return (m_id != 0);
-	}
-
-	void disconnect()
-	{
-		if (auto storage = m_storage.lock())
-		{
-			storage->remove(m_id);
-		}
-		m_storage.reset();
-		m_id = 0;
-	}
+	bool connected() const noexcept;
+	void disconnect();
 
 protected:
 	detail::signal_impl_weak_ptr m_storage;
@@ -67,38 +34,15 @@ class scoped_connection : public connection
 {
 public:
 	scoped_connection() = default;
-
-	scoped_connection(const connection& conn)
-		: connection(conn)
-	{
-	}
-
-	scoped_connection(connection&& conn)
-		: connection(std::move(conn))
-	{
-	}
-
+	scoped_connection(const connection& conn);
+	scoped_connection(connection&& conn);
 	scoped_connection(const scoped_connection&) = delete;
 	scoped_connection& operator=(const scoped_connection&) = delete;
 	scoped_connection(scoped_connection&& other) = default;
+	scoped_connection& operator=(scoped_connection&& other);
+	~scoped_connection();
 
-	scoped_connection& operator=(scoped_connection&& other)
-	{
-		disconnect();
-		static_cast<connection&>(*this) = std::move(other);
-		return *this;
-	}
-
-	~scoped_connection()
-	{
-		disconnect();
-	}
-
-	connection release()
-	{
-		connection conn = std::move(static_cast<connection&>(*this));
-		return conn;
-	}
+	connection release();
 };
 
 } // namespace is::signals

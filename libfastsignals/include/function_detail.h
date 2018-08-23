@@ -85,6 +85,7 @@ public:
 	{
 		if constexpr (sizeof(*this) > function_buffer_size)
 		{
+			(void)buffer;
 			return new free_function_proxy_impl(*this);
 		}
 		else
@@ -115,17 +116,17 @@ public:
 			free_function_proxy_impl<Function, Return, Arguments...>,
 			function_proxy_impl<DecayFunction, Return, Arguments...>>;
 
-		base_function_proxy* proxy = nullptr;
 		if constexpr (sizeof(ProxyType) > function_buffer_size)
 		{
-			proxy = new ProxyType{ std::forward<Function>(function) };
+			base_function_proxy* proxy = new ProxyType{ std::forward<Function>(function) };
+			reset();
+			m_proxy = proxy;
 		}
 		else
 		{
-			proxy = new (&m_buffer) ProxyType{ std::forward<Function>(function) };
+			reset();
+			m_proxy = new (&m_buffer) ProxyType{ std::forward<Function>(function) };
 		}
-		reset();
-		m_proxy = proxy;
 	}
 
 	template <class Signature>

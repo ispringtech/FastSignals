@@ -53,9 +53,9 @@ packed_function::~packed_function() noexcept
 	reset();
 }
 
-// TODO: remove pragmas when code generation bug will be fixed.
+// TODO: remove pragmas when MSVC code generation bug will be fixed.
 #if defined(_MSC_VER)
-#pragma optimize("", off)
+#	pragma optimize("", off)
 #endif
 void packed_function::reset() noexcept
 {
@@ -73,7 +73,7 @@ void packed_function::reset() noexcept
 	}
 }
 #if defined(_MSC_VER)
-#pragma optimize("", on)
+#	pragma optimize("", on)
 #endif
 
 base_function_proxy& packed_function::unwrap() const

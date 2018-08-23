@@ -8,7 +8,6 @@ namespace is::signals
 /**
  * This results combiner reduces results collection into last value of this collection.
  * In other words, it keeps only result of the last slot call.
- * TODO: make combiners Boost-compatible
  */
 template <class T>
 class optional_last_value

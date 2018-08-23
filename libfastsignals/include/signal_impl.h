@@ -20,8 +20,6 @@ public:
 	template <class Combiner, class Result, class Signature, class... Args>
 	Result invoke(Args... args) const
 	{
-		// TODO: (feature) add result combiners
-
 		packed_function slot;
 		size_t slotIndex = static_cast<size_t>(-1);
 		uint64_t slotId = 0;

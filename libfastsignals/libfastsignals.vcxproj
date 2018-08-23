@@ -85,7 +85,7 @@
     <IncludePath>$(SolutionDir)3rdparty;$(IncludePath)</IncludePath>
     <OutDir>$(SolutionDir)build\bin\$(ProjectName)\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)build\tmp\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
-    <TargetName>$(ProjectName)$(DebugSuffixOpt)_$(PlatformToolset)_$(Platform)</TargetName>
+    <TargetName>$(ProjectName)$(DebugSuffixOpt)-$(PlatformToolset)$(PlatformSuffix)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -98,7 +98,7 @@
     <IncludePath>$(SolutionDir)3rdparty;$(IncludePath)</IncludePath>
     <OutDir>$(SolutionDir)build\bin\$(ProjectName)\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)build\tmp\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
-    <TargetName>$(ProjectName)$(DebugSuffixOpt)_$(PlatformToolset)_$(Platform)</TargetName>
+    <TargetName>$(ProjectName)$(DebugSuffixOpt)-$(PlatformToolset)$(PlatformSuffix)</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

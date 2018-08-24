@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <type_traits>
+#include <utility>
 
 namespace is::signals::detail
 {
@@ -41,7 +42,7 @@ public:
 
 	Return operator()(Arguments... args) const final
 	{
-		return std::invoke(m_function, args...);
+		return m_function(args...);
 	}
 
 	base_function_proxy* clone(void* buffer) const final
@@ -78,7 +79,7 @@ public:
 
 	Return operator()(Arguments... args) const final
 	{
-		return std::invoke(m_function, args...);
+		return m_function(args...);
 	}
 
 	base_function_proxy* clone(void* buffer) const final

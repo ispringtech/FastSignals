@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Function.h"
+#include "function.h"
 #include "combiners.h"
 #include "connection.h"
 #include "signal_impl.h"

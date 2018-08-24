@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Function_detail.h"
+#include "function_detail.h"
 
 namespace is::signals
 {

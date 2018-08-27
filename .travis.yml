@@ -21,16 +21,9 @@ script:
   # Build project
   - mkdir -p build && cd build
   - conan install --build=missing ./conanfile.txt
-  - cmake .. -DCMAKE_BUILD_TYPE=$BUILD_CONFIGURATION -DTARGET_CPU=$TARGET_CPU
+  - cmake .. -DCMAKE_BUILD_TYPE=$BUILD_CONFIGURATION -DTARGET_CPU=$TARGET_CPU -DBUILD_TESTING=ON
   - cmake --build .
 
   # Run tests
-  - ls CMakeFiles
-  - ls .
-  - ls ..
-  - ls ../tests
-  - ls ../tests/libfastsignals_unit_tests
-  - ls ../..
-  - ls ../../bin
-  - ls ../../build
-  - bin/libfastsignals_unit_tests
+  - ls . -la
+  - find . -type f

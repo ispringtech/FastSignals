@@ -15,3 +15,11 @@ if(BUILD_TESTING)
     #add_subdirectory(tests/libfastsignals_stress_tests)
     add_subdirectory(tests/libfastsignals_unit_tests)
 endif()
+
+#  Trace variables, bot environment and internal.
+execute_process(COMMAND "${CMAKE_COMMAND}" "-E" "environment")
+get_cmake_property(_variableNames VARIABLES)
+list (SORT _variableNames)
+foreach (_variableName ${_variableNames})
+    message(STATUS "${_variableName}=${${_variableName}}")
+endforeach()

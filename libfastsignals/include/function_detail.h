@@ -3,10 +3,22 @@
 #include <cstdint>
 #include <type_traits>
 #include <utility>
+#include <cassert>
 
 namespace is::signals::detail
 {
 static constexpr size_t function_buffer_size = 4 * sizeof(void*);
+
+template<class T>
+struct type_container
+{
+	T data;
+};
+
+template<class T>
+inline constexpr bool fits_function_buffer = (sizeof(type_container<T>) <= function_buffer_size);
+
+using function_buffer_t = std::aligned_storage_t<function_buffer_size>;
 
 class base_function_proxy
 {
@@ -47,14 +59,14 @@ public:
 
 	base_function_proxy* clone(void* buffer) const final
 	{
-		if constexpr (sizeof(*this) > function_buffer_size)
+		if constexpr (fits_function_buffer<function_proxy_impl>)
 		{
-			(void)buffer;
-			return new function_proxy_impl(*this);
+			return new (buffer) function_proxy_impl(*this);
 		}
 		else
 		{
-			return new (buffer) function_proxy_impl(*this);
+			(void)buffer;
+			return new function_proxy_impl(*this);
 		}
 	}
 
@@ -84,14 +96,14 @@ public:
 
 	base_function_proxy* clone(void* buffer) const final
 	{
-		if constexpr (sizeof(*this) > function_buffer_size)
+		if constexpr (fits_function_buffer<free_function_proxy_impl>)
 		{
-			(void)buffer;
-			return new free_function_proxy_impl(*this);
+			return new (buffer) free_function_proxy_impl(*this);
 		}
 		else
 		{
-			return new (buffer) free_function_proxy_impl(*this);
+			(void)buffer;
+			return new free_function_proxy_impl(*this);
 		}
 	}
 
@@ -109,6 +121,8 @@ public:
 	packed_function& operator=(const packed_function& other);
 	~packed_function() noexcept;
 
+	// Initializes packed function.
+	// Cannot be called without reset().
 	template <class Function, class Return, class... Arguments>
 	void init(Function&& function)
 	{
@@ -117,16 +131,14 @@ public:
 			free_function_proxy_impl<Function, Return, Arguments...>,
 			function_proxy_impl<DecayFunction, Return, Arguments...>>;
 
-		if constexpr (sizeof(ProxyType) > function_buffer_size)
+		assert(m_proxy == nullptr);
+		if constexpr (fits_function_buffer<ProxyType>)
 		{
-			base_function_proxy* proxy = new ProxyType{ std::forward<Function>(function) };
-			reset();
-			m_proxy = proxy;
+			m_proxy = new (&m_buffer) ProxyType{ std::forward<Function>(function) };
 		}
 		else
 		{
-			reset();
-			m_proxy = new (&m_buffer) ProxyType{ std::forward<Function>(function) };
+			m_proxy = new ProxyType{ std::forward<Function>(function) };;
 		}
 	}
 
@@ -142,7 +154,7 @@ private:
 	bool is_buffer_allocated() const noexcept;
 
 	base_function_proxy* m_proxy = nullptr;
-	std::aligned_storage_t<function_buffer_size> m_buffer;
+	function_buffer_t m_buffer;
 };
 
 } // namespace is::signals::detail

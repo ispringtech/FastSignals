@@ -67,14 +67,10 @@ TEST_CASE("Can safely pass rvalues", "[signal]")
 	REQUIRE(value1 == expected);
 	REQUIRE(value2 == expected);
 }
-// TODO: remove pragmas when code generation bug will be fixed.
-#if defined(_MSC_VER)
-#pragma optimize("", off)
-#endif
+
 TEST_CASE("Can pass mutable ref", "[signal]")
 {
 	const std::string expected = "If the type T is a reference type, provides the member typedef type which is the type referred to by T. Otherwise type is T.";
-	;
 	signal<void(std::string&)> valueChanged;
 
 	std::string passedValue;
@@ -85,9 +81,6 @@ TEST_CASE("Can pass mutable ref", "[signal]")
 
 	REQUIRE(passedValue == expected);
 }
-#if defined(_MSC_VER)
-#pragma optimize("", on)
-#endif
 
 TEST_CASE("Can disconnect slot with explicit call", "[signal]")
 {

@@ -1,24 +1,37 @@
 #pragma once
 
+#include <cassert>
 #include <cstdint>
 #include <type_traits>
 #include <utility>
-#include <cassert>
 
 namespace is::signals::detail
 {
-static constexpr size_t function_buffer_size = 4 * sizeof(void*);
+/// Buffer for callable object in-place construction,
+/// helps to implement Small Buffer Optimization.
+static constexpr size_t inplace_buffer_size = 4 * sizeof(void*);
 
-template<class T>
+/// Structure that has size enough to keep type "T" including vtable.
+template <class T>
 struct type_container
 {
 	T data;
 };
 
-template<class T>
-inline constexpr bool fits_function_buffer = (sizeof(type_container<T>) <= function_buffer_size);
+/// Type that has enough space to keep type "T" (including vtable) with suitable alignment.
+using function_buffer_t = std::aligned_storage_t<inplace_buffer_size>;
 
-using function_buffer_t = std::aligned_storage_t<function_buffer_size>;
+/// Constantly is true if callable fits function buffer, false otherwise.
+template <class T>
+inline constexpr bool fits_inplace_buffer = (sizeof(type_container<T>) <= inplace_buffer_size);
+
+/// Type that is suitable to keep copy of callable object.
+///  - equal to pointer-to-function if Callable is pointer-to-function
+///  - otherwise removes const/volatile and references to allow copying callable.
+template <class Callable>
+using callable_copy_t = std::conditional_t<std::is_function_v<std::remove_reference_t<Callable>>,
+	Callable,
+	std::remove_cv_t<std::remove_reference_t<Callable>>>;
 
 class base_function_proxy
 {
@@ -34,32 +47,32 @@ template <class Return, class... Arguments>
 class function_proxy<Return(Arguments...)> : public base_function_proxy
 {
 public:
-	virtual Return operator()(Arguments...) const = 0;
+	virtual Return operator()(Arguments&&...) = 0;
 };
 
-template <class Function, class Return, class... Arguments>
+template <class Callable, class Return, class... Arguments>
 class function_proxy_impl final : public function_proxy<Return(Arguments...)>
 {
 public:
 	// If you see this error, probably your function returns value and you're trying to
 	//  connect it to `signal<void(...)>`. Just remove return value from callback.
-	static_assert(std::is_same_v<std::invoke_result_t<Function, Arguments...>, Return>,
+	static_assert(std::is_same_v<std::invoke_result_t<Callable, Arguments...>, Return>,
 		"cannot construct function<> class from callable object with different return type");
 
 	template <class FunctionObject>
 	explicit function_proxy_impl(FunctionObject&& function)
-		: m_function(std::forward<FunctionObject>(function))
+		: m_callable(std::forward<FunctionObject>(function))
 	{
 	}
 
-	Return operator()(Arguments... args) const final
+	Return operator()(Arguments&&... args) final
 	{
-		return m_function(args...);
+		return m_callable(std::forward<Arguments>(args)...);
 	}
 
 	base_function_proxy* clone(void* buffer) const final
 	{
-		if constexpr (fits_function_buffer<function_proxy_impl>)
+		if constexpr (fits_inplace_buffer<function_proxy_impl>)
 		{
 			return new (buffer) function_proxy_impl(*this);
 		}
@@ -71,44 +84,7 @@ public:
 	}
 
 private:
-	mutable Function m_function{};
-};
-
-template <class Function, class Return, class... Arguments>
-class free_function_proxy_impl final : public function_proxy<Return(Arguments...)>
-{
-public:
-	// If you see this error, probably your function returns value and you're trying to
-	//  connect it to `signal<void(...)>`. Just remove return value from callback.
-	static_assert(std::is_same_v<std::invoke_result_t<Function, Arguments...>, Return>,
-		"cannot construct function<> class from free function with different return type");
-
-	template <class FunctionObject>
-	explicit free_function_proxy_impl(FunctionObject&& function)
-		: m_function(std::forward<FunctionObject>(function))
-	{
-	}
-
-	Return operator()(Arguments... args) const final
-	{
-		return m_function(args...);
-	}
-
-	base_function_proxy* clone(void* buffer) const final
-	{
-		if constexpr (fits_function_buffer<free_function_proxy_impl>)
-		{
-			return new (buffer) free_function_proxy_impl(*this);
-		}
-		else
-		{
-			(void)buffer;
-			return new free_function_proxy_impl(*this);
-		}
-	}
-
-private:
-	Function m_function{};
+	callable_copy_t<Callable> m_callable;
 };
 
 class packed_function
@@ -123,29 +99,26 @@ public:
 
 	// Initializes packed function.
 	// Cannot be called without reset().
-	template <class Function, class Return, class... Arguments>
-	void init(Function&& function)
+	template <class Callable, class Return, class... Arguments>
+	void init(Callable&& function)
 	{
-		using DecayFunction = typename std::remove_cv_t<std::remove_reference_t<Function>>;
-		using ProxyType = typename std::conditional_t<std::is_function_v<DecayFunction>,
-			free_function_proxy_impl<Function, Return, Arguments...>,
-			function_proxy_impl<DecayFunction, Return, Arguments...>>;
+		using proxy_t = function_proxy_impl<Callable, Return, Arguments...>;
 
 		assert(m_proxy == nullptr);
-		if constexpr (fits_function_buffer<ProxyType>)
+		if constexpr (fits_inplace_buffer<proxy_t>)
 		{
-			m_proxy = new (&m_buffer) ProxyType{ std::forward<Function>(function) };
+			m_proxy = new (&m_buffer) proxy_t{ std::forward<Callable>(function) };
 		}
 		else
 		{
-			m_proxy = new ProxyType{ std::forward<Function>(function) };;
+			m_proxy = new proxy_t{ std::forward<Callable>(function) };
 		}
 	}
 
 	template <class Signature>
-	const function_proxy<Signature>& get() const
+	function_proxy<Signature>& get() const
 	{
-		return static_cast<const function_proxy<Signature>&>(unwrap());
+		return static_cast<function_proxy<Signature>&>(unwrap());
 	}
 
 private:

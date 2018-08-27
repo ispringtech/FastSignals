@@ -28,7 +28,7 @@ public:
 		{
 			while (get_next_slot(slot, slotIndex, slotId))
 			{
-				slot.get<Signature>()(args...);
+				slot.get<Signature>()(std::forward<Args>(args)...);
 			}
 		}
 		else
@@ -36,7 +36,7 @@ public:
 			Combiner combiner;
 			while (get_next_slot(slot, slotIndex, slotId))
 			{
-				combiner(slot.get<Signature>()(args...));
+				combiner(slot.get<Signature>()(std::forward<Args>(args)...));
 			}
 			return combiner.get_value();
 		}
@@ -46,6 +46,7 @@ private:
 	bool get_next_slot(packed_function& slot, size_t& expectedIndex, uint64_t& nextId) const;
 
 	mutable spin_mutex m_mutex;
+	// TODO: (performance) use single std::vector for functions and IDs
 	std::vector<packed_function> m_functions;
 	std::vector<uint64_t> m_ids;
 	uint64_t m_nextId = 1;

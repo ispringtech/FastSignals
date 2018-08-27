@@ -1,8 +1,8 @@
 #pragma once
 
-#include "function.h"
 #include "combiners.h"
 #include "connection.h"
+#include "function.h"
 #include "signal_impl.h"
 #include "type_traits.h"
 #include <type_traits>

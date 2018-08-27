@@ -9,9 +9,6 @@ compiler:
   - gcc
   # TODO: - clang
 
-sources: ['ubuntu-toolchain-r-test']
-packages: ['g++-8']
-
 env:
   - TARGET_CPU=amd64 BUILD_CONFIGURATION=Release CI_NAME=TRAVIS
   # TODO: - TARGET_CPU=x86 BUILD_CONFIGURATION=Release

@@ -25,5 +25,4 @@ script:
   - cmake --build .
 
   # Run tests
-  - ls . -la
-  - find . -type f
+  - tests/libfastsignals_unit_tests/libfastsignals_unit_tests

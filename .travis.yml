@@ -25,4 +25,9 @@ script:
   - cmake --build .
 
   # Run tests
+  - ls bin
+  - ls build
+  - ls .
+  - ls ..
+  - ls ../bin
   - bin/libfastsignals_unit_tests

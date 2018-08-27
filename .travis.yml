@@ -13,7 +13,7 @@ env:
   - TARGET_CPU=amd64 BUILD_CONFIGURATION=Release CI_NAME=TRAVIS
   # TODO: - TARGET_CPU=x86 BUILD_CONFIGURATION=Release
 
-install:
+before_install:
   # build environment setup script
   - source build/travis-install-env-$TRAVIS_OS_NAME.sh
 

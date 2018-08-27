@@ -3,10 +3,11 @@
 #include <string>
 
 using namespace is::signals;
+using namespace std::literals;
 
 namespace
 {
-template<class T, typename = std::enable_if_t<std::is_same_v<T, bool>>>
+template <class T, typename = std::enable_if_t<std::is_same_v<T, bool>>>
 class any_of_combiner
 {
 public:
@@ -26,7 +27,7 @@ public:
 private:
 	result_type m_result = {};
 };
-}
+} // namespace
 
 TEST_CASE("Can connect a few slots and emit", "[signal]")
 {
@@ -343,4 +344,23 @@ TEST_CASE("Can release scoped connection", "[signal]")
 	valueChanged(90);
 	REQUIRE(value2 == 144);
 	REQUIRE(value3 == 17);
+}
+
+TEST_CASE("Can use signal with more than one argument", "[signal]")
+{
+	signal<void(int, std::string, std::vector<std::string>)> event;
+
+	int value1 = 0;
+	std::string value2;
+	std::vector<std::string> value3;
+	event.connect([&](int v1, const std::string& v2, const std::vector<std::string>& v3) {
+		value1 = v1;
+		value2 = v2;
+		value3 = v3;
+	});
+
+	event(9815, "using namespace std::literals!"s, std::vector{ "std::vector"s, "using namespace std::literals"s });
+	REQUIRE(value1 == 9815);
+	REQUIRE(value2 == "using namespace std::literals!"s);
+	REQUIRE(value3 == std::vector{ "std::vector"s, "using namespace std::literals"s });
 }

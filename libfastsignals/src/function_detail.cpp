@@ -71,7 +71,7 @@ void packed_function::reset() noexcept
 
 base_function_proxy& packed_function::unwrap() const
 {
-	if (!m_proxy)
+	if (m_proxy == nullptr)
 	{
 		throw std::bad_function_call();
 	}

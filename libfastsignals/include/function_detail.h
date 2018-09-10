@@ -127,7 +127,7 @@ private:
 	bool is_buffer_allocated() const noexcept;
 
 	base_function_proxy* m_proxy = nullptr;
-	function_buffer_t m_buffer;
+	function_buffer_t m_buffer = {};
 };
 
 } // namespace is::signals::detail

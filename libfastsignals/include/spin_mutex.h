@@ -32,7 +32,7 @@ public:
 	}
 
 private:
-	std::atomic_flag m_busy{ ATOMIC_FLAG_INIT };
+	std::atomic_flag m_busy = ATOMIC_FLAG_INIT;
 };
 
 } // namespace is::signals

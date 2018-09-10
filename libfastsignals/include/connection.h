@@ -13,12 +13,12 @@ namespace is::signals
 class connection
 {
 public:
-	connection() = default;
+	connection();
 	explicit connection(detail::signal_impl_weak_ptr storage, uint64_t id);
-	connection(const connection& other) = default;
-	connection& operator=(const connection& other) = default;
-	connection(connection&& other);
-	connection& operator=(connection&& other);
+	connection(const connection& other);
+	connection& operator=(const connection& other);
+	connection(connection&& other) noexcept;
+	connection& operator=(connection&& other) noexcept;
 
 	bool connected() const noexcept;
 	void disconnect();
@@ -33,13 +33,13 @@ protected:
 class scoped_connection : public connection
 {
 public:
-	scoped_connection() = default;
+	scoped_connection();
 	scoped_connection(const connection& conn);
-	scoped_connection(connection&& conn);
+	scoped_connection(connection&& conn) noexcept;
 	scoped_connection(const scoped_connection&) = delete;
 	scoped_connection& operator=(const scoped_connection&) = delete;
-	scoped_connection(scoped_connection&& other) = default;
-	scoped_connection& operator=(scoped_connection&& other);
+	scoped_connection(scoped_connection&& other) noexcept;
+	scoped_connection& operator=(scoped_connection&& other) noexcept;
 	~scoped_connection();
 
 	connection release();

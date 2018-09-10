@@ -7,10 +7,12 @@ using namespace std::literals;
 
 namespace
 {
-template <class T, typename = std::enable_if_t<std::is_same_v<T, bool>>>
+template <class T>
 class any_of_combiner
 {
 public:
+	static_assert(std::is_same_v<T, bool>);
+
 	using result_type = bool;
 
 	template <class TRef>

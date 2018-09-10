@@ -3,7 +3,7 @@
 namespace is::signals
 {
 
-connection::connection(connection&& other)
+connection::connection(connection&& other) noexcept
 	: m_storage(other.m_storage)
 	, m_id(other.m_id)
 {
@@ -17,7 +17,11 @@ connection::connection(detail::signal_impl_weak_ptr storage, uint64_t id)
 {
 }
 
-connection& connection::operator=(connection&& other)
+connection::connection() = default;
+
+connection::connection(const connection& other) = default;
+
+connection& connection::operator=(connection&& other) noexcept
 {
 	m_storage = other.m_storage;
 	m_id = other.m_id;
@@ -25,6 +29,8 @@ connection& connection::operator=(connection&& other)
 	other.m_id = 0;
 	return *this;
 }
+
+connection& connection::operator=(const connection& other) = default;
 
 bool connection::connected() const noexcept
 {
@@ -41,7 +47,7 @@ void connection::disconnect()
 	m_id = 0;
 }
 
-scoped_connection::scoped_connection(connection&& conn)
+scoped_connection::scoped_connection(connection&& conn) noexcept
 	: connection(std::move(conn))
 {
 }
@@ -51,7 +57,11 @@ scoped_connection::scoped_connection(const connection& conn)
 {
 }
 
-scoped_connection& scoped_connection::operator=(scoped_connection&& other)
+scoped_connection::scoped_connection() = default;
+
+scoped_connection::scoped_connection(scoped_connection&& other) noexcept = default;
+
+scoped_connection& scoped_connection::operator=(scoped_connection&& other) noexcept
 {
 	disconnect();
 	static_cast<connection&>(*this) = std::move(other);

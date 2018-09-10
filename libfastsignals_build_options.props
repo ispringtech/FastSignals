@@ -4,7 +4,8 @@
   <PropertyGroup Label="UserMacros">
     <!--debug suffix-->
     <DebugSuffixOpt Condition="$(Configuration.StartsWith('Debug'))">d</DebugSuffixOpt>
-    <DebugSuffixOpt Condition="$(Configuration.StartsWith('Release'))"></DebugSuffixOpt>
+    <DebugSuffixOpt Condition="$(Configuration.StartsWith('Release'))">
+    </DebugSuffixOpt>
     <PlatformSuffix Condition="'$(Platform)'=='Win32'">-x32</PlatformSuffix>
     <PlatformSuffix Condition="'$(Platform)'=='x64'">-x64</PlatformSuffix>
   </PropertyGroup>
@@ -12,7 +13,11 @@
   <ItemDefinitionGroup Condition="'$(Configuration)'=='Release'">
     <ClCompile>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
     </ClCompile>
+    <Link>
+      <LinkTimeCodeGeneration>Default</LinkTimeCodeGeneration>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug'">
     <ClCompile>

@@ -1,5 +1,4 @@
 #include "../include/connection.h"
-#include <mutex>
 
 namespace is::signals
 {
@@ -98,20 +97,17 @@ connection scoped_connection::release()
 
 bool advanced_connection::advanced_connection_impl::is_blocked() const noexcept
 {
-	std::lock_guard lk(m_blockerMutex);
-	return !m_blocker.expired();
+	return m_blockCounter.load(std::memory_order_acquire) != 0;
 }
 
-std::shared_ptr<void> advanced_connection::advanced_connection_impl::block()
+void advanced_connection::advanced_connection_impl::block() noexcept
 {
-	std::lock_guard lk(m_blockerMutex);
-	auto blocker = m_blocker.lock();
-	if (!blocker)
-	{
-		blocker = std::shared_ptr<void>(nullptr, null_deleter);
-		m_blocker = blocker;
-	}
-	return blocker;
+	++m_blockCounter;
+}
+
+void advanced_connection::advanced_connection_impl::unblock() noexcept
+{
+	--m_blockCounter;
 }
 
 advanced_connection::advanced_connection() = default;
@@ -139,31 +135,84 @@ shared_connection_block::shared_connection_block(const advanced_connection& conn
 	}
 }
 
-void shared_connection_block::block()
+shared_connection_block::shared_connection_block(const shared_connection_block& other)
+	: m_connection(other.m_connection)
+	, m_blocked(other.m_blocked.load(std::memory_order_acquire))
 {
-	if (!blocking())
+	increment_if_blocked();
+}
+
+shared_connection_block::shared_connection_block(shared_connection_block&& other) noexcept
+	: m_connection(other.m_connection)
+	, m_blocked(other.m_blocked.load(std::memory_order_acquire))
+{
+	other.m_connection.reset();
+	other.m_blocked.store(false, std::memory_order_release);
+}
+
+shared_connection_block& shared_connection_block::operator=(const shared_connection_block& other)
+{
+	if (&other != this)
+	{
+		unblock();
+		m_connection = other.m_connection;
+		m_blocked = other.m_blocked.load(std::memory_order_acquire);
+		increment_if_blocked();
+	}
+	return *this;
+}
+
+shared_connection_block& shared_connection_block::operator=(shared_connection_block&& other) noexcept
+{
+	if (&other != this)
+	{
+		unblock();
+		m_connection = other.m_connection;
+		m_blocked = other.m_blocked.load(std::memory_order_acquire);
+		other.m_connection.reset();
+		other.m_blocked.store(false, std::memory_order_release);
+	}
+	return *this;
+}
+
+void shared_connection_block::block() noexcept
+{
+	bool blocked = false;
+	if (m_blocked.compare_exchange_strong(blocked, true, std::memory_order_acq_rel, std::memory_order_relaxed))
 	{
 		if (auto connection = m_connection.lock())
 		{
-			m_block = connection->block();
-		}
-		else
-		{
-			// Make m_block non-empty so the blocking() method still returns the correct value
-			// after the connection has expired.
-			m_block = std::shared_ptr<void>(nullptr, null_deleter);
+			connection->block();
 		}
 	}
 }
 
-void shared_connection_block::unblock()
+void shared_connection_block::unblock() noexcept
 {
-	m_block.reset();
+	bool blocked = true;
+	if (m_blocked.compare_exchange_strong(blocked, false, std::memory_order_acq_rel, std::memory_order_relaxed))
+	{
+		if (auto connection = m_connection.lock())
+		{
+			connection->unblock();
+		}
+	}
 }
 
 bool shared_connection_block::blocking() const noexcept
 {
-	return m_block != nullptr;
+	return m_blocked;
+}
+
+void shared_connection_block::increment_if_blocked() const noexcept
+{
+	if (m_blocked)
+	{
+		if (auto connection = m_connection.lock())
+		{
+			connection->block();
+		}
+	}
 }
 
 advanced_scoped_connection::advanced_scoped_connection() = default;

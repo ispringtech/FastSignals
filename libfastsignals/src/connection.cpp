@@ -1,7 +1,24 @@
 #include "../include/connection.h"
+#include <mutex>
 
 namespace is::signals
 {
+namespace
+{
+inline void null_deleter(const void*) {}
+
+auto get_advanced_connection_impl(const advanced_connection& connection)
+{
+	struct advanced_connection_impl_getter : public advanced_connection
+	{
+		advanced_connection_impl_getter(const advanced_connection& connection)
+			: advanced_connection(connection)
+		{}
+		using advanced_connection::m_impl;
+	};
+	return advanced_connection_impl_getter(connection).m_impl;
+}
+}
 
 connection::connection(connection&& other) noexcept
 	: m_storage(other.m_storage)
@@ -76,6 +93,103 @@ scoped_connection::~scoped_connection()
 connection scoped_connection::release()
 {
 	connection conn = std::move(static_cast<connection&>(*this));
+	return conn;
+}
+
+bool advanced_connection::advanced_connection_impl::is_blocked() const noexcept
+{
+	std::lock_guard lk(m_blockerMutex);
+	return !m_blocker.expired();
+}
+
+std::shared_ptr<void> advanced_connection::advanced_connection_impl::block()
+{
+	std::lock_guard lk(m_blockerMutex);
+	auto blocker = m_blocker.lock();
+	if (!blocker)
+	{
+		blocker = std::shared_ptr<void>(nullptr, null_deleter);
+		m_blocker = blocker;
+	}
+	return blocker;
+}
+
+advanced_connection::advanced_connection() = default;
+
+advanced_connection::advanced_connection(connection&& conn, impl_ptr&& impl) noexcept
+	: connection(std::move(conn))
+	, m_impl(std::move(impl))
+{
+}
+
+advanced_connection::advanced_connection(const advanced_connection&) = default;
+
+advanced_connection::advanced_connection(advanced_connection&& other) noexcept = default;
+
+advanced_connection& advanced_connection::operator=(const advanced_connection&) = default;
+
+advanced_connection& advanced_connection::operator=(advanced_connection&& other) noexcept = default;
+
+shared_connection_block::shared_connection_block(const advanced_connection& connection, bool initially_blocked)
+	: m_connection(get_advanced_connection_impl(connection))
+{
+	if (initially_blocked)
+	{
+		block();
+	}
+}
+
+void shared_connection_block::block()
+{
+	if (!blocking())
+	{
+		if (auto connection = m_connection.lock())
+		{
+			m_block = connection->block();
+		}
+		else
+		{
+			// Make m_block non-empty so the blocking() method still returns the correct value
+			// after the connection has expired.
+			m_block = std::shared_ptr<void>(nullptr, null_deleter);
+		}
+	}
+}
+
+void shared_connection_block::unblock()
+{
+	m_block.reset();
+}
+
+bool shared_connection_block::blocking() const noexcept
+{
+	return m_block != nullptr;
+}
+
+advanced_scoped_connection::advanced_scoped_connection() = default;
+
+advanced_scoped_connection::advanced_scoped_connection(const advanced_connection& conn)
+	: advanced_connection(conn)
+{
+}
+
+advanced_scoped_connection::advanced_scoped_connection(advanced_connection&& conn) noexcept
+	: advanced_connection(std::move(conn))
+{
+}
+
+advanced_scoped_connection::advanced_scoped_connection(advanced_scoped_connection&& other) noexcept = default;
+
+advanced_scoped_connection& advanced_scoped_connection::operator=(advanced_scoped_connection&& other) noexcept = default;
+
+advanced_scoped_connection::~advanced_scoped_connection()
+{
+	disconnect();
+}
+
+advanced_connection advanced_scoped_connection::release()
+{
+	advanced_connection conn = std::move(static_cast<advanced_connection&>(*this));
 	return conn;
 }
 

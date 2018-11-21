@@ -16,6 +16,8 @@ namespace is::signals
 template <class Signature, template <class T> class Combiner = optional_last_value>
 class signal;
 
+struct advanced_tag {};
+
 // Signal allows to fire events to many subscribers (slots).
 // In other words, it implements one-to-many relation between event and listeners.
 // Signal implements observable object from Observable pattern.
@@ -42,6 +44,27 @@ public:
 	{
 		const uint64_t id = m_slots->add(slot.pack());
 		return connection(m_slots, id);
+	}
+
+	/**
+	 * connect(slot, advanced_tag) method subscribes slot to signal emission event with the ability to temporarily block slot execution
+	 * Each time you call signal as functor, all non-blocked slots are also called with given arguments.
+	 * You can temporarily block slot execution using shared_connection_block
+	 * @returns advanced_connection - object which manages signal-slot connection lifetime
+	 */
+	advanced_connection connect(slot_type slot, advanced_tag)
+	{
+		static_assert(std::is_void_v<Return>, "Advanced connect can only be used with slots returning void (implementation limitation)");
+		auto conn_impl = std::make_shared<advanced_connection::advanced_connection_impl>();
+		slot_type slot_impl = [this, slot, weak_conn_impl = std::weak_ptr(conn_impl)](signal_arg_t<Arguments>... args) {
+			auto conn_impl = weak_conn_impl.lock();
+			if (!conn_impl || !conn_impl->is_blocked())
+			{
+				slot(args...);
+			}
+		};
+		auto conn = connect(std::move(slot_impl));
+		return advanced_connection(std::move(conn), std::move(conn_impl));
 	}
 
 	/**

@@ -39,6 +39,7 @@ public:
 
 	private:
 		std::weak_ptr<void> m_blocker;
+		mutable spin_mutex m_blockerMutex;
 	};
 	using impl_ptr = std::shared_ptr<advanced_connection_impl>;
 

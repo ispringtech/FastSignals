@@ -1,4 +1,5 @@
 #include "../include/connection.h"
+#include <mutex>
 
 namespace is::signals
 {
@@ -97,11 +98,13 @@ connection scoped_connection::release()
 
 bool advanced_connection::advanced_connection_impl::is_blocked() const noexcept
 {
+	std::lock_guard lk(m_blockerMutex);
 	return !m_blocker.expired();
 }
 
 std::shared_ptr<void> advanced_connection::advanced_connection_impl::block()
 {
+	std::lock_guard lk(m_blockerMutex);
 	auto blocker = m_blocker.lock();
 	if (!blocker)
 	{

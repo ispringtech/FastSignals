@@ -366,3 +366,123 @@ TEST_CASE("Can use signal with more than one argument", "[signal]")
 	REQUIRE(value2 == "using namespace std::literals!"s);
 	REQUIRE(value3 == std::vector{ "std::vector"s, "using namespace std::literals"s });
 }
+
+TEST_CASE("Can blocks slots using shared_connection_block", "[signal]")
+{
+	bool callbackShouldBeCalled = true;
+	bool callbackCalled = false;
+	const int value = 123;
+	signal<void(int)> event;
+	auto conn = event.connect([&](int gotValue) {
+		CHECK(gotValue == value);
+		callbackCalled = true;
+		if (!callbackShouldBeCalled)
+		{
+			FAIL("callback is blocked and should not be called");
+		}
+	}, advanced_tag{});
+	event(value);
+	REQUIRE(callbackCalled);
+	shared_connection_block block(conn);
+	callbackShouldBeCalled = false;
+	callbackCalled = false;
+	event(value);
+	REQUIRE(!callbackCalled);
+	block.unblock();
+	callbackShouldBeCalled = true;
+	event(value);
+	REQUIRE(callbackCalled);
+}
+
+TEST_CASE("Other slots are unaffected by the block", "[signal]")
+{
+	bool callback1Called = false;
+	bool callback2Called = false;
+	const int value = 123;
+	signal<void(int)> event;
+	auto conn1 = event.connect([&](int gotValue) {
+		CHECK(gotValue == value);
+		callback1Called = true;
+	}, advanced_tag{});
+	auto conn2 = event.connect([&](int) {
+		callback2Called = true;
+		FAIL("callback is blocked and should not be called");
+	}, advanced_tag{});
+	shared_connection_block block(conn2);
+	event(value);
+	REQUIRE(callback1Called);
+	REQUIRE(!callback2Called);
+}
+
+TEST_CASE("Multiple blocks block until last one is unblocked", "[signal]")
+{
+	bool callbackShouldBeCalled = false;
+	bool callbackCalled = false;
+	const int value = 123;
+	signal<void(int)> event;
+	auto conn = event.connect([&](int gotValue) {
+		CHECK(gotValue == value);
+		callbackCalled = true;
+		if (!callbackShouldBeCalled)
+		{
+			FAIL("callback is blocked and should not be called");
+		}
+	}, advanced_tag{});
+	shared_connection_block block1(conn);
+	shared_connection_block block2(conn);
+	event(value);
+	REQUIRE(!callbackCalled);
+	block1.unblock();
+	event(value);
+	REQUIRE(!callbackCalled);
+	block1.block();
+	block2.unblock();
+	event(value);
+	REQUIRE(!callbackCalled);
+	block1.unblock();
+	callbackShouldBeCalled = true;
+	event(value);
+	REQUIRE(callbackCalled);
+}
+
+TEST_CASE("Can disconnect advanced slot using advanced_scoped_connection", "[signal]")
+{
+	signal<void(int)> valueChanged;
+
+	int value1 = 0;
+	int value2 = 0;
+	int value3 = 0;
+	{
+		advanced_scoped_connection conn1 = valueChanged.connect([&value1](int value) {
+			value1 = value;
+		}, advanced_tag{});
+		{
+			advanced_scoped_connection conn2 = valueChanged.connect([&value2](int value) {
+				value2 = value;
+			}, advanced_tag{});
+			valueChanged.connect([&value3](int value) {
+				value3 = value;
+			});
+			REQUIRE(value1 == 0);
+			REQUIRE(value2 == 0);
+			REQUIRE(value3 == 0);
+
+			valueChanged(10);
+			REQUIRE(value1 == 10);
+			REQUIRE(value2 == 10);
+			REQUIRE(value3 == 10);
+		}
+
+		// conn2 disconnected.
+		valueChanged(-99);
+		REQUIRE(value1 == -99);
+		REQUIRE(value2 == 10);
+		REQUIRE(value3 == -99);
+	}
+
+	// conn1 disconnected.
+	valueChanged(17);
+	REQUIRE(value1 == -99);
+	REQUIRE(value2 == 10);
+	REQUIRE(value3 == 17);
+}

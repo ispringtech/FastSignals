@@ -445,6 +445,66 @@ TEST_CASE("Multiple blocks block until last one is unblocked", "[signal]")
 	REQUIRE(callbackCalled);
 }
 
+TEST_CASE("Can copy and move shared_connection_block objects", "[signal]")
+{
+	bool callbackShouldBeCalled = false;
+	bool callbackCalled = false;
+	const int value = 123;
+	signal<void(int)> event;
+	auto conn = event.connect([&](int gotValue) {
+		CHECK(gotValue == value);
+		callbackCalled = true;
+		if (!callbackShouldBeCalled)
+		{
+			FAIL("callback is blocked and should not be called");
+		}
+	},
+		advanced_tag{});
+	shared_connection_block block1(conn);
+
+	shared_connection_block block2(block1);
+	event(value);
+	REQUIRE(block1.blocking());
+	REQUIRE(block2.blocking());
+	REQUIRE(!callbackCalled);
+
+	shared_connection_block block3(std::move(block2));
+	event(value);
+	REQUIRE(block1.blocking());
+	REQUIRE(!block2.blocking());
+	REQUIRE(block3.blocking());
+	REQUIRE(!callbackCalled);
+
+	block2 = block3;
+	event(value);
+	REQUIRE(block1.blocking());
+	REQUIRE(block2.blocking());
+	REQUIRE(block3.blocking());
+	REQUIRE(!callbackCalled);
+
+	block3 = std::move(block2);
+	event(value);
+	REQUIRE(block1.blocking());
+	REQUIRE(!block2.blocking());
+	REQUIRE(block3.blocking());
+	REQUIRE(!callbackCalled);
+
+	block3 = shared_connection_block(conn, false);
+	event(value);
+	REQUIRE(block1.blocking());
+	REQUIRE(!block2.blocking());
+	REQUIRE(!block3.blocking());
+	REQUIRE(!callbackCalled);
+
+	block1.unblock();
+	callbackShouldBeCalled = true;
+	event(value);
+	REQUIRE(!block1.blocking());
+	REQUIRE(!block2.blocking());
+	REQUIRE(!block3.blocking());
+	REQUIRE(callbackCalled);
+}
+
 TEST_CASE("Can disconnect advanced slot using advanced_scoped_connection", "[signal]")
 {
 	signal<void(int)> valueChanged;

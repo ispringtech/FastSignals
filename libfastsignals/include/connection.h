@@ -34,12 +34,12 @@ class advanced_connection : public connection
 public:
 	struct advanced_connection_impl
 	{
-		std::shared_ptr<void> block();
+		void block() noexcept;
+		void unblock() noexcept;
 		bool is_blocked() const noexcept;
 
 	private:
-		std::weak_ptr<void> m_blocker;
-		mutable spin_mutex m_blockerMutex;
+		std::atomic<int> m_blockCounter = ATOMIC_VAR_INIT(0);
 	};
 	using impl_ptr = std::shared_ptr<advanced_connection_impl>;
 
@@ -59,14 +59,20 @@ class shared_connection_block
 {
 public:
 	shared_connection_block(const advanced_connection& connection = advanced_connection(), bool initially_blocked = true);
+	shared_connection_block(const shared_connection_block& other);
+	shared_connection_block(shared_connection_block&& other) noexcept;
+	shared_connection_block& operator=(const shared_connection_block& other);
+	shared_connection_block& operator=(shared_connection_block&& other) noexcept;
 
-	void block();
-	void unblock();
+	void block() noexcept;
+	void unblock() noexcept;
 	bool blocking() const noexcept;
 
 private:
+	void increment_if_blocked() const noexcept;
+
 	std::weak_ptr<advanced_connection::advanced_connection_impl> m_connection;
-	std::shared_ptr<void> m_block;
+	std::atomic<bool> m_blocked = ATOMIC_VAR_INIT(false);
 };
 
 // Scoped connection keeps link between signal and slot and disconnects them in destructor.

@@ -14,8 +14,9 @@ packed_function::packed_function(packed_function&& other) noexcept
 	else
 	{
 		m_proxy = other.m_proxy;
+		other.m_proxy = nullptr;
 	}
-	other.m_proxy = nullptr;
+	other.reset();
 }
 
 packed_function::packed_function(const packed_function& other)

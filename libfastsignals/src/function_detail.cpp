@@ -5,7 +5,7 @@
 namespace is::signals::detail
 {
 
-packed_function::packed_function(packed_function&& other)
+packed_function::packed_function(packed_function&& other) noexcept
 {
 	if (other.is_buffer_allocated())
 	{
@@ -14,8 +14,8 @@ packed_function::packed_function(packed_function&& other)
 	else
 	{
 		m_proxy = other.m_proxy;
-		other.m_proxy = nullptr;
 	}
+	other.m_proxy = nullptr;
 }
 
 packed_function::packed_function(const packed_function& other)
@@ -23,7 +23,7 @@ packed_function::packed_function(const packed_function& other)
 	m_proxy = other.m_proxy->clone(&m_buffer);
 }
 
-packed_function& packed_function::operator=(packed_function&& other)
+packed_function& packed_function::operator=(packed_function&& other) noexcept
 {
 	if (other.is_buffer_allocated())
 	{

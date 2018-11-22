@@ -91,9 +91,9 @@ class packed_function
 {
 public:
 	packed_function() = default;
-	packed_function(packed_function&& other);
+	packed_function(packed_function&& other) noexcept;
 	packed_function(const packed_function& other);
-	packed_function& operator=(packed_function&& other);
+	packed_function& operator=(packed_function&& other) noexcept;
 	packed_function& operator=(const packed_function& other);
 	~packed_function() noexcept;
 

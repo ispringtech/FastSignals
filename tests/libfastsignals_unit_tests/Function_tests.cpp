@@ -201,3 +201,35 @@ TEST_CASE("Can construct function with cons std::function<>&", "[function]")
 	fn(true);
 	REQUIRE(value == true);
 }
+
+TEST_CASE("Can copy function", "[function]")
+{
+	unsigned calledCount = 0;
+	bool value = false;
+	function<void(bool)> callback = [&](bool gotValue) {
+		++calledCount;
+		value = gotValue;
+	};
+	auto callback2 = callback;
+	REQUIRE(calledCount == 0);
+	CHECK(!value);
+	callback(true);
+	REQUIRE(calledCount == 1);
+	CHECK(value);
+	callback2(false);
+	REQUIRE(calledCount == 2);
+	CHECK(!value);
+}
+
+TEST_CASE("Can move function", "[function]")
+{
+	bool called = false;
+	function<void()> callback = [&] {
+		called = true;
+	};
+	auto callback2(std::move(callback));
+	REQUIRE_THROWS(callback());
+	REQUIRE(!called);
+	callback2();
+	REQUIRE(called);
+}

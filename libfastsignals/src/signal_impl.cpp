@@ -60,4 +60,9 @@ bool signal_impl::get_next_slot(packed_function& slot, size_t& expectedIndex, ui
 	return true;
 }
 
+size_t signal_impl::count() const noexcept
+{
+	return m_functions.size();
+}
+
 } // namespace is::signals::detail

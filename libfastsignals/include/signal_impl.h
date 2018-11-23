@@ -17,6 +17,8 @@ public:
 
 	void remove_all() noexcept;
 
+	size_t count() const noexcept;
+
 	template <class Combiner, class Result, class Signature, class... Args>
 	Result invoke(Args... args) const
 	{

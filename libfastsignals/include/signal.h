@@ -76,6 +76,22 @@ public:
 	}
 
 	/**
+	 * num_slots() method returns number of slots attached to this singal
+	 */
+	std::size_t num_slots() const noexcept
+	{
+		return m_slots->count();
+	}
+
+	/**
+	 * empty() method returns if signal has any slots attached
+	 */
+	bool empty() const noexcept
+	{
+		return m_slots->count() == 0;
+	}
+
+	/**
 	 * operator(args...) calls all slots connected to this signal.
 	 * Logically, it fires signal emission event.
 	 */

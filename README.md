@@ -2,7 +2,7 @@
 
 Easy to use, fast and clean C++17 signals/slots implementation with Boost.Signals2 compatible API.
 
-[![Build Status](https://travis-ci.org/CppFakeIt/FastSignals.svg?branch=master)](https://travis-ci.org/CppFakeIt/FastSignals)
+[![Build Status](https://travis-ci.org/ispringteam/FastSignals.svg?branch=master)](https://travis-ci.org/ispringteam/FastSignals)
 [![License: MIT](https://img.shields.io/badge/License-MIT-brightgreen.svg)](https://opensource.org/licenses/MIT)
 
 ## Documentation

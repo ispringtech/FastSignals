@@ -20,8 +20,3 @@ mkdir -p $CMAKE_DIR
 tar --strip-components=1 -xzf $CMAKE_TAR -C $CMAKE_DIR
 export PATH=$CMAKE_DIR/bin:$PATH
 cmake --version
-
-# install conan
-sudo pip install --upgrade pip requests conan
-conan remote add bincrafters https://api.bintray.com/conan/bincrafters/public-conan
-conan config set compiler.libcxx=libstdc++11

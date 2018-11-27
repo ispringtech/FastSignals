@@ -1,5 +1,0 @@
-[requires]
-boost_signals2/1.66.0@bincrafters/stable
-
-[generators]
-cmake

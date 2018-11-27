@@ -1,2 +1,0 @@
-
-custom_add_test_from_dir(libfastsignals_bench libfastsignals)

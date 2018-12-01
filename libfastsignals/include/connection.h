@@ -13,15 +13,15 @@ namespace is::signals
 class connection
 {
 public:
-	connection();
-	explicit connection(detail::signal_impl_weak_ptr storage, uint64_t id);
-	connection(const connection& other);
-	connection& operator=(const connection& other);
+	connection() noexcept;
+	explicit connection(detail::signal_impl_weak_ptr storage, uint64_t id) noexcept;
+	connection(const connection& other) noexcept;
+	connection& operator=(const connection& other) noexcept;
 	connection(connection&& other) noexcept;
 	connection& operator=(connection&& other) noexcept;
 
 	bool connected() const noexcept;
-	void disconnect();
+	void disconnect() noexcept;
 
 protected:
 	detail::signal_impl_weak_ptr m_storage;
@@ -43,10 +43,10 @@ public:
 	};
 	using impl_ptr = std::shared_ptr<advanced_connection_impl>;
 
-	advanced_connection();
+	advanced_connection() noexcept;
 	explicit advanced_connection(connection&& conn, impl_ptr&& impl) noexcept;
-	advanced_connection(const advanced_connection&);
-	advanced_connection& operator=(const advanced_connection&);
+	advanced_connection(const advanced_connection&) noexcept;
+	advanced_connection& operator=(const advanced_connection&) noexcept;
 	advanced_connection(advanced_connection&& other) noexcept;
 	advanced_connection& operator=(advanced_connection&& other) noexcept;
 
@@ -80,8 +80,8 @@ private:
 class scoped_connection : public connection
 {
 public:
-	scoped_connection();
-	scoped_connection(const connection& conn);
+	scoped_connection() noexcept;
+	scoped_connection(const connection& conn) noexcept;
 	scoped_connection(connection&& conn) noexcept;
 	scoped_connection(const advanced_connection& conn) = delete;
 	scoped_connection(advanced_connection&& conn) noexcept = delete;
@@ -91,15 +91,15 @@ public:
 	scoped_connection& operator=(scoped_connection&& other) noexcept;
 	~scoped_connection();
 
-	connection release();
+	connection release() noexcept;
 };
 
 // scoped connection for advanced connections
 class advanced_scoped_connection : public advanced_connection
 {
 public:
-	advanced_scoped_connection();
-	advanced_scoped_connection(const advanced_connection& conn);
+	advanced_scoped_connection() noexcept;
+	advanced_scoped_connection(const advanced_connection& conn) noexcept;
 	advanced_scoped_connection(advanced_connection&& conn) noexcept;
 	advanced_scoped_connection(const advanced_scoped_connection&) = delete;
 	advanced_scoped_connection& operator=(const advanced_scoped_connection&) = delete;
@@ -107,7 +107,7 @@ public:
 	advanced_scoped_connection& operator=(advanced_scoped_connection&& other) noexcept;
 	~advanced_scoped_connection();
 
-	advanced_connection release();
+	advanced_connection release() noexcept;
 };
 
 } // namespace is::signals

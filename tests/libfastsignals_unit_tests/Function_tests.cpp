@@ -233,3 +233,35 @@ TEST_CASE("Can move function", "[function]")
 	callback2();
 	REQUIRE(called);
 }
+
+TEST_CASE("Can release packed function", "[function]")
+{
+	function<int()> iota = [v = 0]() mutable {
+		return v++;
+	};
+	REQUIRE(iota() == 0);
+
+	auto packedFn = std::move(iota).release();
+	REQUIRE_THROWS_AS(iota(), std::bad_function_call);
+
+	auto&& proxy = packedFn.get<int()>();
+	REQUIRE(proxy() == 1);
+	REQUIRE(proxy() == 2);
+}
+
+TEST_CASE("Function copy has its own packed function", "[function]")
+{
+	function<int()> iota = [v = 0]() mutable {
+		return v++;
+	};
+
+	REQUIRE(iota() == 0);
+
+	auto iotaCopy(iota);
+
+	REQUIRE(iota() == 1);
+	REQUIRE(iota() == 2);
+
+	REQUIRE(iotaCopy() == 1);
+	REQUIRE(iotaCopy() == 2);
+}

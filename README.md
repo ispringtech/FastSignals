@@ -3,7 +3,7 @@
 Yet another C++ signals/slots library
 
 * Works as drop-in replacement for Boost.Signals2
-** Has better performance and more compact binary code
+    * Has better performance and more compact binary code
 * Has easy to use thread-safe API
 * Implemented with compact, pure C++17 code
 

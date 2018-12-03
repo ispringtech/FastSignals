@@ -81,10 +81,7 @@ base_function_proxy& packed_function::unwrap() const
 
 bool packed_function::is_buffer_allocated() const noexcept
 {
-	const std::byte* bufferStart = reinterpret_cast<const std::byte*>(&m_buffer);
-	const std::byte* bufferEnd = reinterpret_cast<const std::byte*>(&m_buffer + 1);
-	const std::byte* proxy = reinterpret_cast<const std::byte*>(m_proxy);
-	return (proxy >= bufferStart && proxy < bufferEnd);
+	return m_proxy == std::launder(reinterpret_cast<const base_function_proxy*>(&m_buffer));
 }
 
 } // namespace is::signals::detail

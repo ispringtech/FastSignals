@@ -341,7 +341,8 @@ TEST_CASE("can work with callables with virtual inheritance", "[function]")
 	struct C : public virtual A
 	{
 	};
-	struct D : virtual public B, virtual public C
+	struct D : virtual public B
+		, virtual public C
 	{
 		D(bool* destructorCalled)
 		{
@@ -358,4 +359,46 @@ TEST_CASE("can work with callables with virtual inheritance", "[function]")
 		destructorCalled = false;
 	}
 	CHECK(destructorCalled);
+}
+
+TEST_CASE("uses copy constructor if callable's move constructor throws", "[function]")
+{
+	struct Callable
+	{
+		Callable() = default;
+		Callable(Callable&&)
+		{
+			throw std::runtime_error("throw");
+		}
+		Callable(const Callable& other) = default;
+		void operator()() const
+		{
+		}
+	};
+	Callable c;
+	function<void()> f(c);
+	auto f2 = std::move(f);
+	f2();
+	CHECK_THROWS(f());
+}
+
+TEST_CASE("uses move constructor if it is noexcept", "[function]")
+{
+	struct Callable
+	{
+		Callable() = default;
+		Callable(Callable&& other) noexcept = default;
+		Callable(const Callable&)
+		{
+			throw std::runtime_error("throw");
+		}
+		void operator()() const
+		{
+		}
+	};
+	Callable c;
+	function<void()> f(std::move(c));
+	auto f2 = std::move(f);
+	f2();
+	CHECK_THROWS(f());
 }

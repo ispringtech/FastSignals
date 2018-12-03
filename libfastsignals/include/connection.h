@@ -58,10 +58,10 @@ protected:
 class shared_connection_block
 {
 public:
-	shared_connection_block(const advanced_connection& connection = advanced_connection(), bool initially_blocked = true);
-	shared_connection_block(const shared_connection_block& other);
+	shared_connection_block(const advanced_connection& connection = advanced_connection(), bool initially_blocked = true) noexcept;
+	shared_connection_block(const shared_connection_block& other) noexcept;
 	shared_connection_block(shared_connection_block&& other) noexcept;
-	shared_connection_block& operator=(const shared_connection_block& other);
+	shared_connection_block& operator=(const shared_connection_block& other) noexcept;
 	shared_connection_block& operator=(shared_connection_block&& other) noexcept;
 
 	void block() noexcept;

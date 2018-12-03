@@ -6,7 +6,7 @@ namespace
 {
 inline void null_deleter(const void*) {}
 
-auto get_advanced_connection_impl(const advanced_connection& connection)
+auto get_advanced_connection_impl(const advanced_connection& connection) noexcept
 {
 	struct advanced_connection_impl_getter : public advanced_connection
 	{
@@ -127,7 +127,7 @@ advanced_connection& advanced_connection::operator=(const advanced_connection&) 
 
 advanced_connection& advanced_connection::operator=(advanced_connection&& other) noexcept = default;
 
-shared_connection_block::shared_connection_block(const advanced_connection& connection, bool initially_blocked)
+shared_connection_block::shared_connection_block(const advanced_connection& connection, bool initially_blocked) noexcept
 	: m_connection(get_advanced_connection_impl(connection))
 {
 	if (initially_blocked)
@@ -136,7 +136,7 @@ shared_connection_block::shared_connection_block(const advanced_connection& conn
 	}
 }
 
-shared_connection_block::shared_connection_block(const shared_connection_block& other)
+shared_connection_block::shared_connection_block(const shared_connection_block& other) noexcept
 	: m_connection(other.m_connection)
 	, m_blocked(other.m_blocked.load(std::memory_order_acquire))
 {
@@ -151,7 +151,7 @@ shared_connection_block::shared_connection_block(shared_connection_block&& other
 	other.m_blocked.store(false, std::memory_order_release);
 }
 
-shared_connection_block& shared_connection_block::operator=(const shared_connection_block& other)
+shared_connection_block& shared_connection_block::operator=(const shared_connection_block& other) noexcept
 {
 	if (&other != this)
 	{

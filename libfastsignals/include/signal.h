@@ -16,7 +16,9 @@ namespace is::signals
 template <class Signature, template <class T> class Combiner = optional_last_value>
 class signal;
 
-struct advanced_tag {};
+struct advanced_tag
+{
+};
 
 // Signal allows to fire events to many subscribers (slots).
 // In other words, it implements one-to-many relation between event and listeners.
@@ -42,7 +44,7 @@ public:
 	 */
 	connection connect(slot_type slot)
 	{
-		const uint64_t id = m_slots->add(slot.pack());
+		const uint64_t id = m_slots->add(slot.release());
 		return connection(m_slots, id);
 	}
 

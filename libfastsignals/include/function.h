@@ -25,7 +25,7 @@ public:
 	function& operator=(const function& other) = default;
 	function& operator=(function&& other) noexcept = default;
 
-	template <class Fn, typename = enable_if_callable_t<Fn, function<Return(Arguments...)>, Return, Arguments...>> 
+	template <class Fn, typename = enable_if_callable_t<Fn, function<Return(Arguments...)>, Return, Arguments...>>
 	function(Fn&& function)
 	{
 		m_packed.init<Fn, Return, Arguments...>(std::forward<Fn>(function));
@@ -37,7 +37,7 @@ public:
 		return proxy(std::forward<Arguments>(args)...);
 	}
 
-	detail::packed_function pack()
+	detail::packed_function release()
 	{
 		return std::move(m_packed);
 	}

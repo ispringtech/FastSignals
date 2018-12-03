@@ -25,6 +25,10 @@ using function_buffer_t = std::aligned_storage_t<inplace_buffer_size>;
 template <class T>
 inline constexpr bool fits_inplace_buffer = (sizeof(type_container<T>) <= inplace_buffer_size);
 
+/// Constantly is true if callable fits function buffer and can be safely moved, false otherwise
+template <class T>
+inline constexpr bool can_use_inplace_buffer = fits_inplace_buffer<T> && std::is_nothrow_move_constructible_v<T>;
+
 /// Type that is suitable to keep copy of callable object.
 ///  - equal to pointer-to-function if Callable is pointer-to-function
 ///  - otherwise removes const/volatile and references to allow copying callable.
@@ -38,6 +42,7 @@ class base_function_proxy
 public:
 	virtual ~base_function_proxy() = default;
 	virtual base_function_proxy* clone(void* buffer) const = 0;
+	virtual base_function_proxy* move(void* buffer) noexcept = 0;
 };
 
 template <class Signature>
@@ -72,7 +77,7 @@ public:
 
 	base_function_proxy* clone(void* buffer) const final
 	{
-		if constexpr (fits_inplace_buffer<function_proxy_impl>)
+		if constexpr (can_use_inplace_buffer<function_proxy_impl>)
 		{
 			return new (buffer) function_proxy_impl(*this);
 		}
@@ -80,6 +85,19 @@ public:
 		{
 			(void)buffer;
 			return new function_proxy_impl(*this);
+		}
+	}
+
+	base_function_proxy* move(void* buffer) noexcept final
+	{
+		if constexpr (can_use_inplace_buffer<function_proxy_impl>)
+		{
+			return new (buffer) function_proxy_impl(std::move(*this));
+		}
+		else
+		{
+			(void)buffer;
+			return this;
 		}
 	}
 
@@ -105,7 +123,7 @@ public:
 		using proxy_t = function_proxy_impl<Callable, Return, Arguments...>;
 
 		assert(m_proxy == nullptr);
-		if constexpr (fits_inplace_buffer<proxy_t>)
+		if constexpr (can_use_inplace_buffer<proxy_t>)
 		{
 			m_proxy = new (&m_buffer) proxy_t{ std::forward<Callable>(function) };
 			m_isBufferAllocated = true;

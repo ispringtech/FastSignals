@@ -234,6 +234,17 @@ TEST_CASE("Can move function", "[function]")
 	REQUIRE(called);
 }
 
+TEST_CASE("Works when copying self", "[function]")
+{
+	bool called = false;
+	function<void()> callback = [&] {
+		called = true;
+	};
+	callback = callback;
+	callback();
+	REQUIRE(called);
+}
+
 TEST_CASE("Can release packed function", "[function]")
 {
 	function<int()> iota = [v = 0]() mutable {

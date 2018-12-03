@@ -8,16 +8,8 @@ namespace is::signals::detail
 packed_function::packed_function(packed_function&& other) noexcept
 {
 	m_isBufferAllocated = other.m_isBufferAllocated;
-	if (m_isBufferAllocated)
-	{
-		m_proxy = other.m_proxy->clone(&m_buffer);
-	}
-	else
-	{
-		m_proxy = other.m_proxy;
-		other.m_proxy = nullptr;
-	}
-	other.reset();
+	m_proxy = other.m_proxy->move(&m_buffer);
+	other.m_proxy = nullptr;
 }
 
 packed_function::packed_function(const packed_function& other)
@@ -28,28 +20,20 @@ packed_function::packed_function(const packed_function& other)
 
 packed_function& packed_function::operator=(packed_function&& other) noexcept
 {
-	if (other.m_isBufferAllocated)
-	{
-		// There are no strong exception safety since we cannot allocate
-		//  new object on buffer and than reset same buffer.
-		reset();
-		m_proxy = other.m_proxy->clone(&m_buffer);
-	}
-	else
-	{
-		reset();
-		std::swap(m_proxy, other.m_proxy);
-	}
+	reset();
 	m_isBufferAllocated = other.m_isBufferAllocated;
+	m_proxy = other.m_proxy->move(&m_buffer);
+	other.m_proxy = nullptr;
 	return *this;
 }
 
 packed_function& packed_function::operator=(const packed_function& other)
 {
 	auto* proxy = other.m_proxy->clone(&m_buffer);
+	bool isBufferAllocated = other.m_isBufferAllocated;
 	reset();
 	m_proxy = proxy;
-	m_isBufferAllocated = other.m_isBufferAllocated;
+	m_isBufferAllocated = isBufferAllocated;
 	return *this;
 }
 
@@ -72,7 +56,6 @@ void packed_function::reset() noexcept
 		}
 		m_proxy = nullptr;
 	}
-	m_isBufferAllocated = false;
 }
 
 base_function_proxy& packed_function::unwrap() const

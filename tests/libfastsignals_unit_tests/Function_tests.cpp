@@ -265,3 +265,86 @@ TEST_CASE("Function copy has its own packed function", "[function]")
 	REQUIRE(iotaCopy() == 1);
 	REQUIRE(iotaCopy() == 2);
 }
+
+TEST_CASE("can work with callables that have vtable", "[function]")
+{
+	class Base
+	{
+	};
+
+	class Interface : public Base
+	{
+	public:
+		virtual ~Interface() = default;
+		virtual void operator()() const = 0;
+	};
+	class Class : public Interface
+	{
+	public:
+		Class(bool* destructorCalled)
+			: m_destructorCalled(destructorCalled)
+		{
+		}
+
+		~Class()
+		{
+			*m_destructorCalled = true;
+		}
+
+		void operator()() const override
+		{
+		}
+
+		bool* m_destructorCalled = nullptr;
+	};
+	bool destructorCalled = false;
+	{
+		function<void()> f = Class(&destructorCalled);
+		f();
+		auto packed = f.release();
+		destructorCalled = false;
+	}
+	CHECK(destructorCalled);
+}
+
+TEST_CASE("can work with callables with virtual inheritance", "[function]")
+{
+	struct A
+	{
+		void operator()() const
+		{
+			m_called = true;
+		}
+
+		~A()
+		{
+			*m_destructorCalled = true;
+		}
+
+		mutable bool m_called = false;
+		bool* m_destructorCalled = nullptr;
+	};
+	struct B : public virtual A
+	{
+	};
+	struct C : public virtual A
+	{
+	};
+	struct D : virtual public B, virtual public C
+	{
+		D(bool* destructorCalled)
+		{
+			m_destructorCalled = destructorCalled;
+		}
+
+		using A::operator();
+	};
+	bool destructorCalled = false;
+	{
+		function<void()> f = D(&destructorCalled);
+		f();
+		auto packed = f.release();
+		destructorCalled = false;
+	}
+	CHECK(destructorCalled);
+}

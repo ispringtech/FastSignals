@@ -108,10 +108,12 @@ public:
 		if constexpr (fits_inplace_buffer<proxy_t>)
 		{
 			m_proxy = new (&m_buffer) proxy_t{ std::forward<Callable>(function) };
+			m_isBufferAllocated = true;
 		}
 		else
 		{
 			m_proxy = new proxy_t{ std::forward<Callable>(function) };
+			m_isBufferAllocated = false;
 		}
 	}
 
@@ -124,10 +126,10 @@ public:
 private:
 	void reset() noexcept;
 	base_function_proxy& unwrap() const;
-	bool is_buffer_allocated() const noexcept;
 
 	base_function_proxy* m_proxy = nullptr;
 	function_buffer_t m_buffer = {};
+	bool m_isBufferAllocated = false;
 };
 
 } // namespace is::signals::detail

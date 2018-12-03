@@ -4,13 +4,12 @@ namespace is::signals
 {
 namespace
 {
-inline void null_deleter(const void*) {}
 
 auto get_advanced_connection_impl(const advanced_connection& connection) noexcept
 {
-	struct advanced_connection_impl_getter : public advanced_connection
+	struct advanced_connection_impl_getter : private advanced_connection
 	{
-		advanced_connection_impl_getter(const advanced_connection& connection)
+		advanced_connection_impl_getter(const advanced_connection& connection) noexcept
 			: advanced_connection(connection)
 		{
 		}
@@ -18,6 +17,7 @@ auto get_advanced_connection_impl(const advanced_connection& connection) noexcep
 	};
 	return advanced_connection_impl_getter(connection).m_impl;
 }
+
 } // namespace
 
 connection::connection(connection&& other) noexcept

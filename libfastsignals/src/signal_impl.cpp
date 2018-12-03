@@ -8,11 +8,21 @@ namespace is::signals::detail
 uint64_t signal_impl::add(packed_function fn)
 {
 	std::lock_guard lock(m_mutex);
-	uint64_t id = ++m_nextId;
-	m_functions.emplace_back(std::move(fn));
-	m_ids.emplace_back(id);
 
-	return id;
+	m_functions.emplace_back(std::move(fn));
+
+	try
+	{
+		m_ids.emplace_back(m_nextId);
+	}
+	catch (const std::bad_alloc& /*e*/)
+	{
+		// Remove function since we failed to add its id
+		m_functions.pop_back();
+		throw;
+	}
+
+	return m_nextId++;
 }
 
 void signal_impl::remove(uint64_t id) noexcept

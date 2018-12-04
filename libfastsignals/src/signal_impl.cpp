@@ -62,6 +62,8 @@ bool signal_impl::get_next_slot(packed_function& slot, size_t& expectedIndex, ui
 
 size_t signal_impl::count() const noexcept
 {
+	std::lock_guard lock(m_mutex);
+
 	return m_functions.size();
 }
 

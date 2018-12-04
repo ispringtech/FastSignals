@@ -8,28 +8,28 @@ namespace is::signals::detail
 packed_function::packed_function(packed_function&& other) noexcept
 {
 	m_isBufferAllocated = other.m_isBufferAllocated;
-	m_proxy = other.m_proxy->move(&m_buffer);
+	m_proxy = other.m_proxy ? other.m_proxy->move(&m_buffer) : nullptr;
 	other.m_proxy = nullptr;
 }
 
 packed_function::packed_function(const packed_function& other)
 {
 	m_isBufferAllocated = other.m_isBufferAllocated;
-	m_proxy = other.m_proxy->clone(&m_buffer);
+	m_proxy = other.m_proxy ? other.m_proxy->clone(&m_buffer) : nullptr;
 }
 
 packed_function& packed_function::operator=(packed_function&& other) noexcept
 {
 	reset();
 	m_isBufferAllocated = other.m_isBufferAllocated;
-	m_proxy = other.m_proxy->move(&m_buffer);
+	m_proxy = other.m_proxy ? other.m_proxy->move(&m_buffer) : nullptr;
 	other.m_proxy = nullptr;
 	return *this;
 }
 
 packed_function& packed_function::operator=(const packed_function& other)
 {
-	auto* proxy = other.m_proxy->clone(&m_buffer);
+	auto* proxy = other.m_proxy ? other.m_proxy->clone(&m_buffer) : nullptr;
 	bool isBufferAllocated = other.m_isBufferAllocated;
 	reset();
 	m_proxy = proxy;

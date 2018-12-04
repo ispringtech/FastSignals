@@ -402,3 +402,10 @@ TEST_CASE("uses move constructor if it is noexcept", "[function]")
 	f2();
 	CHECK_THROWS(f());
 }
+
+TEST_CASE("can copy and move empty function", "[function]")
+{
+	function<void()> f;
+	auto f2 = f;
+	auto f3 = std::move(f);
+}

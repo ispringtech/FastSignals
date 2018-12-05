@@ -20,9 +20,9 @@ struct advanced_tag
 {
 };
 
-// Signal allows to fire events to many subscribers (slots).
-// In other words, it implements one-to-many relation between event and listeners.
-// Signal implements observable object from Observable pattern.
+/// Signal allows to fire events to many subscribers (slots).
+/// In other words, it implements one-to-many relation between event and listeners.
+/// Signal implements observable object from Observable pattern.
 template <class Return, class... Arguments, template <class T> class Combiner>
 class signal<Return(Arguments...), Combiner>
 {
@@ -36,6 +36,18 @@ public:
 		: m_slots(std::make_shared<detail::signal_impl>())
 	{
 	}
+
+	/// No copy construction
+	signal(const signal&) = delete;
+
+	/// Moves signal from other. Any operations on other except destruction, move, and swap are invalid
+	signal(signal&& other) = default;
+
+	/// No copy assignment
+	signal& operator=(const signal&) = delete;
+
+	/// Moves signal from other. Any operations on other except destruction, move, and swap are invalid
+	signal& operator=(signal&& other) = default;
 
 	/**
 	 * connect(slot) method subscribes slot to signal emission event.
@@ -102,7 +114,27 @@ public:
 		return m_slots->invoke<combiner_type, result_type, signature_type, signal_arg_t<Arguments>...>(args...);
 	}
 
+	void swap(signal& other) noexcept
+	{
+		m_slots.swap(other.m_slots);
+	}
+
 private:
 	detail::signal_impl_ptr m_slots;
 };
+
 } // namespace is::signals
+
+namespace std
+{
+
+// free swap function, findable by ADL
+template <class Signature, template <class T> class Combiner>
+void swap(
+	::is::signals::signal<Signature, Combiner>& sig1,
+	::is::signals::signal<Signature, Combiner>& sig2)
+{
+	sig1.swap(sig2);
+}
+
+} // namespace std

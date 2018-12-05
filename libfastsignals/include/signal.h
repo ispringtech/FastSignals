@@ -72,7 +72,7 @@ public:
 	/**
 	 * disconnect_all_slots() method disconnects all slots from signal emission event.
 	 */
-	void disconnect_all_slots()
+	void disconnect_all_slots() noexcept
 	{
 		m_slots->remove_all();
 	}
@@ -80,7 +80,7 @@ public:
 	/**
 	 * num_slots() method returns number of slots attached to this singal
 	 */
-	std::size_t num_slots() const noexcept
+	[[nodiscard]] std::size_t num_slots() const noexcept
 	{
 		return m_slots->count();
 	}
@@ -88,7 +88,7 @@ public:
 	/**
 	 * empty() method returns if signal has any slots attached
 	 */
-	bool empty() const noexcept
+	[[nodiscard]] bool empty() const noexcept
 	{
 		return m_slots->count() == 0;
 	}

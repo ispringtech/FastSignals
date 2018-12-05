@@ -380,7 +380,8 @@ TEST_CASE("Can blocks slots using shared_connection_block", "[signal]")
 		{
 			FAIL("callback is blocked and should not be called");
 		}
-	}, advanced_tag{});
+	},
+		advanced_tag{});
 	event(value);
 	REQUIRE(callbackCalled);
 	shared_connection_block block(conn);
@@ -403,11 +404,13 @@ TEST_CASE("Other slots are unaffected by the block", "[signal]")
 	auto conn1 = event.connect([&](int gotValue) {
 		CHECK(gotValue == value);
 		callback1Called = true;
-	}, advanced_tag{});
+	},
+		advanced_tag{});
 	auto conn2 = event.connect([&](int) {
 		callback2Called = true;
 		FAIL("callback is blocked and should not be called");
-	}, advanced_tag{});
+	},
+		advanced_tag{});
 	shared_connection_block block(conn2);
 	event(value);
 	REQUIRE(callback1Called);
@@ -427,7 +430,8 @@ TEST_CASE("Multiple blocks block until last one is unblocked", "[signal]")
 		{
 			FAIL("callback is blocked and should not be called");
 		}
-	}, advanced_tag{});
+	},
+		advanced_tag{});
 	shared_connection_block block1(conn);
 	shared_connection_block block2(conn);
 	event(value);
@@ -515,11 +519,13 @@ TEST_CASE("Can disconnect advanced slot using advanced_scoped_connection", "[sig
 	{
 		advanced_scoped_connection conn1 = valueChanged.connect([&value1](int value) {
 			value1 = value;
-		}, advanced_tag{});
+		},
+			advanced_tag{});
 		{
 			advanced_scoped_connection conn2 = valueChanged.connect([&value2](int value) {
 				value2 = value;
-			}, advanced_tag{});
+			},
+				advanced_tag{});
 			valueChanged.connect([&value3](int value) {
 				value3 = value;
 			});
@@ -545,4 +551,61 @@ TEST_CASE("Can disconnect advanced slot using advanced_scoped_connection", "[sig
 	REQUIRE(value1 == -99);
 	REQUIRE(value2 == 10);
 	REQUIRE(value3 == 17);
+}
+
+TEST_CASE("Can move signal", "[signal]")
+{
+	signal<void()> src;
+
+	int srcFireCount = 0;
+	auto srcConn = src.connect([&srcFireCount] {
+		++srcFireCount;
+	});
+
+	src();
+	REQUIRE(srcFireCount == 1);
+
+	auto dst = std::move(src);
+
+	int dstFireCount = 0;
+	auto dstConn = dst.connect([&dstFireCount] {
+		++dstFireCount;
+	});
+
+	dst();
+	REQUIRE(srcFireCount == 2);
+	REQUIRE(dstFireCount == 1);
+
+	srcConn.disconnect();
+	dstConn.disconnect();
+	dst();
+	REQUIRE(srcFireCount == 2);
+	REQUIRE(dstFireCount == 1);
+}
+
+TEST_CASE("Can swap signals", "[signal]")
+{
+	signal<void()> s1;
+	signal<void()> s2;
+
+	int s1FireCount = 0;
+	int s2FireCount = 0;
+
+	s1.connect([&s1FireCount] {
+		++s1FireCount;
+	});
+
+	s2.connect([&s2FireCount] {
+		++s2FireCount;
+	});
+
+	std::swap(s1, s2);
+
+	s1();
+	REQUIRE(s1FireCount == 0);
+	REQUIRE(s2FireCount == 1);
+
+	s2();
+	REQUIRE(s1FireCount == 1);
+	REQUIRE(s2FireCount == 1);
 }

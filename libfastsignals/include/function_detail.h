@@ -9,7 +9,7 @@ namespace is::signals::detail
 {
 /// Buffer for callable object in-place construction,
 /// helps to implement Small Buffer Optimization.
-static constexpr size_t inplace_buffer_size = 4 * sizeof(void*);
+static constexpr size_t inplace_buffer_size = (sizeof(int) == sizeof(void*) ? 6 : 4) * sizeof(void*);
 
 /// Structure that has size enough to keep type "T" including vtable.
 template <class T>
@@ -25,9 +25,11 @@ using function_buffer_t = std::aligned_storage_t<inplace_buffer_size>;
 template <class T>
 inline constexpr bool fits_inplace_buffer = (sizeof(type_container<T>) <= inplace_buffer_size);
 
+// clang-format off
 /// Constantly is true if callable fits function buffer and can be safely moved, false otherwise
 template <class T>
 inline constexpr bool can_use_inplace_buffer = fits_inplace_buffer<T> && std::is_nothrow_move_constructible_v<T>;
+// clang format on
 
 /// Type that is suitable to keep copy of callable object.
 ///  - equal to pointer-to-function if Callable is pointer-to-function
@@ -119,7 +121,7 @@ public:
 	// Initializes packed function.
 	// Cannot be called without reset().
 	template <class Callable, class Return, class... Arguments>
-	void init(Callable&& function) noexcept(fits_inplace_buffer<function_proxy_impl<Callable, Return, Arguments...>>)
+	void init(Callable&& function) noexcept(can_use_inplace_buffer<function_proxy_impl<Callable, Return, Arguments...>>)
 	{
 		using proxy_t = function_proxy_impl<Callable, Return, Arguments...>;
 
@@ -127,12 +129,10 @@ public:
 		if constexpr (can_use_inplace_buffer<proxy_t>)
 		{
 			m_proxy = new (&m_buffer) proxy_t{ std::forward<Callable>(function) };
-			m_isBufferAllocated = true;
 		}
 		else
 		{
 			m_proxy = new proxy_t{ std::forward<Callable>(function) };
-			m_isBufferAllocated = false;
 		}
 	}
 
@@ -156,10 +156,10 @@ public:
 private:
 	void reset() noexcept;
 	base_function_proxy& unwrap() const;
+	bool is_buffer_allocated() const noexcept;
 
+	function_buffer_t m_buffer[1] = {};
 	base_function_proxy* m_proxy = nullptr;
-	function_buffer_t m_buffer = {};
-	bool m_isBufferAllocated = false;
 };
 
 } // namespace is::signals::detail

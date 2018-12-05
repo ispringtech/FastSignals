@@ -107,6 +107,7 @@ private:
 
 class packed_function
 {
+
 public:
 	packed_function() = default;
 	packed_function(packed_function&& other) noexcept;
@@ -118,7 +119,7 @@ public:
 	// Initializes packed function.
 	// Cannot be called without reset().
 	template <class Callable, class Return, class... Arguments>
-	void init(Callable&& function)
+	void init(Callable&& function) noexcept(fits_inplace_buffer<function_proxy_impl<Callable, Return, Arguments...>>)
 	{
 		using proxy_t = function_proxy_impl<Callable, Return, Arguments...>;
 
@@ -135,10 +136,21 @@ public:
 		}
 	}
 
+	explicit operator bool() const noexcept
+	{
+		return m_proxy != nullptr;
+	}
+
 	template <class Signature>
 	function_proxy<Signature>& get() const
 	{
 		return static_cast<function_proxy<Signature>&>(unwrap());
+	}
+
+	template <class Signature>
+	function_proxy<Signature>* try_get() const noexcept
+	{
+		return static_cast<function_proxy<Signature>*>(m_proxy);
 	}
 
 private:

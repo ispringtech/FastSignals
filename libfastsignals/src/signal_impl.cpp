@@ -7,6 +7,11 @@ namespace is::signals::detail
 
 uint64_t signal_impl::add(packed_function fn)
 {
+	if (!fn)
+	{
+		throw std::invalid_argument("Can't add empty slot");
+	}
+
 	std::lock_guard lock(m_mutex);
 
 	m_functions.emplace_back(std::move(fn));

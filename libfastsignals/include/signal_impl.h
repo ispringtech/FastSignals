@@ -30,7 +30,7 @@ public:
 		{
 			while (get_next_slot(slot, slotIndex, slotId))
 			{
-				slot.get<Signature>()(std::forward<Args>(args)...);
+				(*slot.try_get<Signature>())(std::forward<Args>(args)...);
 			}
 		}
 		else
@@ -38,7 +38,7 @@ public:
 			Combiner combiner;
 			while (get_next_slot(slot, slotIndex, slotId))
 			{
-				combiner(slot.get<Signature>()(std::forward<Args>(args)...));
+				combiner((*slot.try_get<Signature>())(std::forward<Args>(args)...));
 			}
 			return combiner.get_value();
 		}

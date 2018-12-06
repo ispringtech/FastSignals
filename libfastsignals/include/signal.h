@@ -111,7 +111,7 @@ public:
 	 */
 	result_type operator()(signal_arg_t<Arguments>... args) const
 	{
-		return m_slots->invoke<combiner_type, result_type, signature_type, signal_arg_t<Arguments>...>(args...);
+		return std::shared_ptr(m_slots)->invoke<combiner_type, result_type, signature_type, signal_arg_t<Arguments>...>(args...);
 	}
 
 	void swap(signal& other) noexcept

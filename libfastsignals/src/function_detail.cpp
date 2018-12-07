@@ -26,9 +26,11 @@ packed_function& packed_function::operator=(packed_function&& other) noexcept
 
 packed_function& packed_function::operator=(const packed_function& other)
 {
-	auto* proxy = other.m_proxy ? other.m_proxy->clone(&m_buffer) : nullptr;
-	reset();
-	m_proxy = proxy;
+	if (this != &other)
+	{
+		reset();
+		m_proxy = other.m_proxy ? other.m_proxy->clone(&m_buffer) : nullptr;
+	}
 	return *this;
 }
 

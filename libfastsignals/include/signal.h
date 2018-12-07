@@ -111,7 +111,7 @@ public:
 	 */
 	result_type operator()(signal_arg_t<Arguments>... args) const
 	{
-		return std::shared_ptr(m_slots)->invoke<combiner_type, result_type, signature_type, signal_arg_t<Arguments>...>(args...);
+		return detail::signal_impl_ptr(m_slots)->invoke<combiner_type, result_type, signature_type, signal_arg_t<Arguments>...>(args...);
 	}
 
 	void swap(signal& other) noexcept
@@ -124,7 +124,7 @@ public:
 	 */
 	operator slot_type() const noexcept
 	{
-		return [weakSlots = std::weak_ptr(m_slots)](signal_arg_t<Arguments>... args) {
+		return [weakSlots = detail::signal_impl_weak_ptr(m_slots)](signal_arg_t<Arguments>... args) {
 			if (auto slots = weakSlots.lock())
 			{
 				return slots->invoke<combiner_type, result_type, signature_type, signal_arg_t<Arguments>...>(args...);

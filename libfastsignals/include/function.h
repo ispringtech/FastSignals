@@ -4,10 +4,15 @@
 
 namespace is::signals
 {
+// Derive your class from not_directly_callable to prevent function from wrapping it using its template constructor
+// Useful if your class provides custom operator for casting to function
+struct not_directly_callable
+{
+};
 
 template <class Fn, class Function, class Return, class... Arguments>
 using enable_if_callable_t = typename std::enable_if_t<
-	!std::is_same_v<std::decay_t<Fn>, Function> && std::is_same_v<std::invoke_result_t<Fn, Arguments...>, Return>>;
+	!std::is_same_v<std::decay_t<Fn>, Function> && !std::is_base_of_v<not_directly_callable, std::decay_t<Fn>> && std::is_same_v<std::invoke_result_t<Fn, Arguments...>, Return>>;
 
 template <class Signature>
 class function;

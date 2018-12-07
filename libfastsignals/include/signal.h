@@ -24,7 +24,7 @@ struct advanced_tag
 /// In other words, it implements one-to-many relation between event and listeners.
 /// Signal implements observable object from Observable pattern.
 template <class Return, class... Arguments, template <class T> class Combiner>
-class signal<Return(Arguments...), Combiner>
+class signal<Return(Arguments...), Combiner> : private not_directly_callable
 {
 public:
 	using signature_type = Return(signal_arg_t<Arguments>...);
@@ -98,7 +98,7 @@ public:
 	}
 
 	/**
-	 * empty() method returns if signal has any slots attached
+	 * empty() method returns true if signal has any slots attached
 	 */
 	[[nodiscard]] bool empty() const noexcept
 	{
@@ -117,6 +117,19 @@ public:
 	void swap(signal& other) noexcept
 	{
 		m_slots.swap(other.m_slots);
+	}
+
+	/**
+	 * Allows using signals as slots for another signal
+	 */
+	operator slot_type() const noexcept
+	{
+		return [weakSlots = std::weak_ptr(m_slots)](signal_arg_t<Arguments>... args) {
+			if (auto slots = weakSlots.lock())
+			{
+				return slots->invoke<combiner_type, result_type, signature_type, signal_arg_t<Arguments>...>(args...);
+			}
+		};
 	}
 
 private:

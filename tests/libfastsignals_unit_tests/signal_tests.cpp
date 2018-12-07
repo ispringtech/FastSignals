@@ -609,3 +609,34 @@ TEST_CASE("Can swap signals", "[signal]")
 	REQUIRE(s1FireCount == 1);
 	REQUIRE(s2FireCount == 1);
 }
+
+TEST_CASE("Signal can be destroyed inside its slot and will call the rest of its slots", "[signal]")
+{
+	std::optional<signal<void()>> s;
+	s.emplace();
+	s->connect([&] {
+		s.reset();
+	});
+	bool called = false;
+	s->connect([&] {
+		called = true;
+	});
+	(*s)();
+	CHECK(called);
+}
+
+TEST_CASE("Signal can be used as a slot for another signal", "[signal]")
+{
+	signal<void()> s1;
+	bool called = false;
+	s1.connect([&] {
+		called = true;
+	});
+
+	signal<void()> s2;
+	s2.connect(s1);
+
+	s2();
+
+	CHECK(called);
+}

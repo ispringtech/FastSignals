@@ -409,3 +409,53 @@ TEST_CASE("can copy and move empty function", "[function]")
 	auto f2 = f;
 	auto f3 = std::move(f);
 }
+
+TEST_CASE("properly copies callable on assignment", "[function]")
+{
+	struct Callable
+	{
+		Callable(int& aliveCounter)
+			: m_aliveCounter(&aliveCounter)
+		{
+			++*m_aliveCounter;
+		}
+		Callable(const Callable& other)
+			: m_aliveCounter(other.m_aliveCounter)
+		{
+			if (m_aliveCounter)
+			{
+				++*m_aliveCounter;
+			}
+		}
+		Callable(Callable&& other) noexcept
+			: m_aliveCounter(other.m_aliveCounter)
+		{
+			other.m_aliveCounter = nullptr;
+		}
+		~Callable()
+		{
+			if (m_aliveCounter)
+			{
+				--*m_aliveCounter;
+			}
+		}
+		void operator()() const
+		{
+		}
+
+		int* m_aliveCounter = nullptr;
+	};
+	int aliveCounter1 = 0;
+	int aliveCounter2 = 0;
+	function<void()> f = Callable(aliveCounter1);
+	function<void()> f2 = Callable(aliveCounter2);
+	CHECK(aliveCounter1 == 1);
+	CHECK(aliveCounter2 == 1);
+	f = f2;
+	CHECK(aliveCounter1 == 0);
+	CHECK(aliveCounter2 == 2);
+	f = function<void()>();
+	f2 = function<void()>();
+	CHECK(aliveCounter1 == 0);
+	CHECK(aliveCounter2 == 0);
+}

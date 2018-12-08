@@ -66,9 +66,15 @@ public:
 	static_assert(std::is_same_v<std::invoke_result_t<Callable, Arguments...>, Return>,
 		"cannot construct function<> class from callable object with different return type");
 
-	template <class FunctionObject>
+	template <class FunctionObject, typename = std::enable_if_t<std::is_move_constructible_v<FunctionObject>>>
 	explicit function_proxy_impl(FunctionObject&& function)
 		: m_callable(std::forward<FunctionObject>(function))
+	{
+	}
+
+	template <class FunctionObject, typename = std::enable_if_t<std::is_copy_constructible_v<FunctionObject>>>
+	explicit function_proxy_impl(const FunctionObject& function)
+		: m_callable(function)
 	{
 	}
 

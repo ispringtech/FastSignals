@@ -403,6 +403,18 @@ TEST_CASE("uses move constructor if it is noexcept", "[function]")
 	CHECK_THROWS(f());
 }
 
+TEST_CASE("uses Callable's copy constructor if move constructor is not available", "[function]")
+{
+	struct Callable
+	{
+		Callable() = default;
+		Callable(Callable&&) = delete;
+		Callable(const Callable&) = default;
+		void operator()() const {}
+	};
+	function<void()> fn(Callable{});
+}
+
 TEST_CASE("can copy and move empty function", "[function]")
 {
 	function<void()> f;

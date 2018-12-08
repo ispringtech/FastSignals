@@ -42,7 +42,7 @@ public:
 		return proxy(std::forward<Arguments>(args)...);
 	}
 
-	detail::packed_function release()
+	detail::packed_function release() noexcept
 	{
 		return std::move(m_packed);
 	}

@@ -6,30 +6,53 @@ namespace is::signals::detail
 {
 
 packed_function::packed_function(packed_function&& other) noexcept
+	: m_proxy(move_proxy_from(std::move(other)))
 {
-	m_proxy = other.m_proxy ? other.m_proxy->move(&m_buffer) : nullptr;
-	other.m_proxy = nullptr;
 }
 
 packed_function::packed_function(const packed_function& other)
+	: m_proxy(copy_proxy_from(other))
 {
-	m_proxy = other.m_proxy ? other.m_proxy->clone(&m_buffer) : nullptr;
 }
 
 packed_function& packed_function::operator=(packed_function&& other) noexcept
 {
+	assert(this != &other);
 	reset();
-	m_proxy = other.m_proxy ? other.m_proxy->move(&m_buffer) : nullptr;
-	other.m_proxy = nullptr;
+	m_proxy = move_proxy_from(std::move(other));
 	return *this;
+}
+
+base_function_proxy* packed_function::copy_proxy_from(const packed_function& other)
+{
+	return other.m_proxy ? other.m_proxy->clone(&m_buffer) : nullptr;
+}
+
+base_function_proxy* packed_function::move_proxy_from(packed_function&& other) noexcept
+{
+	auto proxy = other.m_proxy ? other.m_proxy->move(&m_buffer) : nullptr;
+	other.m_proxy = nullptr;
+	return proxy;
 }
 
 packed_function& packed_function::operator=(const packed_function& other)
 {
 	if (this != &other)
 	{
-		reset();
-		m_proxy = other.m_proxy ? other.m_proxy->clone(&m_buffer) : nullptr;
+		if (other.is_buffer_allocated() && m_proxy)
+		{
+			// other.m_proxy is not null
+			function_buffer_t tempBuffer;
+			auto proxy = other.m_proxy->clone(&tempBuffer);
+			reset();
+			m_proxy = proxy->move(&m_buffer);
+		}
+		else
+		{
+			auto newProxy = other.m_proxy ? other.m_proxy->clone(&m_buffer) : nullptr;
+			reset();
+			m_proxy = newProxy;
+		}
 	}
 	return *this;
 }

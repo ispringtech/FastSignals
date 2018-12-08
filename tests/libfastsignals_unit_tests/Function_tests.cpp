@@ -459,3 +459,69 @@ TEST_CASE("properly copies callable on assignment", "[function]")
 	CHECK(aliveCounter1 == 0);
 	CHECK(aliveCounter2 == 0);
 }
+
+TEST_CASE("copy assignment operator provides strong exception safety", "[function]")
+{
+	struct State
+	{
+		int callCount = 0;
+		bool throwOnCopy = false;
+	};
+	struct Callable
+	{
+		Callable(State& state)
+			: state(&state)
+		{
+		}
+		void operator()()
+		{
+			++state->callCount;
+		}
+		Callable(const Callable& other)
+			: state(other.state)
+		{
+			if (state->throwOnCopy)
+			{
+				throw std::runtime_error("throw on request");
+			}
+		}
+		State* state = nullptr;
+	};
+	static_assert(!detail::can_use_inplace_buffer<Callable>);
+
+	State srcState;
+	State dstState;
+
+	function<void()> srcFn(Callable{ srcState });
+	function<void()> dstFn(Callable{ dstState });
+
+	srcFn();
+	dstFn();
+
+	REQUIRE(srcState.callCount == 1);
+	REQUIRE(dstState.callCount == 1);
+
+	srcState.throwOnCopy = true;
+
+	REQUIRE_THROWS_AS(dstFn = srcFn, std::runtime_error);
+
+	// srcFn and dstFn must not be emptied even if assignment throws
+	REQUIRE_NOTHROW(srcFn());
+	REQUIRE_NOTHROW(dstFn());
+
+	// srcFn and dstFn must keep their state
+	REQUIRE(srcState.callCount == 2);
+	REQUIRE(dstState.callCount == 2);
+
+	// The next copy will succeed
+	srcState.throwOnCopy = false;
+	REQUIRE_NOTHROW(dstFn = srcFn);
+
+	// Both functions are usable
+	REQUIRE_NOTHROW(srcFn());
+	REQUIRE_NOTHROW(dstFn());
+
+	// After assignment, dstFn and srcFn refer the same state - srcState
+	REQUIRE(srcState.callCount == 4);
+	REQUIRE(dstState.callCount == 2);
+}

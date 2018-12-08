@@ -9,7 +9,7 @@ namespace is::signals::detail
 {
 /// Buffer for callable object in-place construction,
 /// helps to implement Small Buffer Optimization.
-static constexpr size_t inplace_buffer_size = (sizeof(int) == sizeof(void*) ? 6 : 4) * sizeof(void*);
+static constexpr size_t inplace_buffer_size = (sizeof(int) == sizeof(void*) ? 8 : 6) * sizeof(void*);
 
 /// Structure that has size enough to keep type "T" including vtable.
 template <class T>
@@ -28,7 +28,9 @@ inline constexpr bool fits_inplace_buffer = (sizeof(type_container<T>) <= inplac
 // clang-format off
 /// Constantly is true if callable fits function buffer and can be safely moved, false otherwise
 template <class T>
-inline constexpr bool can_use_inplace_buffer = fits_inplace_buffer<T> && std::is_nothrow_move_constructible_v<T>;
+inline constexpr bool can_use_inplace_buffer = 
+	fits_inplace_buffer<T> && 
+	std::is_nothrow_move_constructible_v<T>;
 // clang format on
 
 /// Type that is suitable to keep copy of callable object.
@@ -144,8 +146,11 @@ public:
 		return static_cast<function_proxy<Signature>&>(unwrap());
 	}
 
-private:
 	void reset() noexcept;
+
+private:
+	base_function_proxy* copy_proxy_from(const packed_function& other);
+	base_function_proxy* move_proxy_from(packed_function&& other) noexcept;
 	base_function_proxy& unwrap() const;
 	bool is_buffer_allocated() const noexcept;
 

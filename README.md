@@ -1,10 +1,10 @@
 # FastSignals
 
-Yet another C++ signals/slots library
+Yet another C++ signals and slots library
 
-* Works as drop-in replacement for Boost.Signals2
+* Works as drop-in replacement for Boost.Signals2 with the same API
     * Has better performance and more compact binary code
-* Has easy to use thread-safe API
+* Thread-safe in most operations, including concurrent connects/disconnects/emits
 * Implemented with compact, pure C++17 code
 
 [![Build Status](https://travis-ci.org/ispringteam/FastSignals.svg?branch=master)](https://travis-ci.org/ispringteam/FastSignals)

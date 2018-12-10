@@ -65,6 +65,7 @@ bool signal_impl::get_next_slot(packed_function& slot, size_t& expectedIndex, ui
 		expectedIndex = std::distance(m_ids.cbegin(), it);
 	}
 
+	slot.reset();
 	slot = m_functions[expectedIndex];
 	nextId = (expectedIndex + 1 < m_ids.size()) ? m_ids[expectedIndex + 1] : m_ids[expectedIndex] + 1;
 	++expectedIndex;

@@ -107,6 +107,9 @@ private:
 	callable_copy_t<Callable> m_callable;
 };
 
+template <class Fn, class Return, class... Arguments>
+inline constexpr bool is_noexcept_packed_function_init = can_use_inplace_buffer<function_proxy_impl<Fn, Return, Arguments...>>;
+
 class packed_function
 {
 public:
@@ -120,7 +123,7 @@ public:
 	// Initializes packed function.
 	// Cannot be called without reset().
 	template <class Callable, class Return, class... Arguments>
-	void init(Callable&& function) noexcept(can_use_inplace_buffer<function_proxy_impl<Callable, Return, Arguments...>>)
+	void init(Callable&& function) noexcept(is_noexcept_packed_function_init<Callable, Return, Arguments...>)
 	{
 		using proxy_t = function_proxy_impl<Callable, Return, Arguments...>;
 

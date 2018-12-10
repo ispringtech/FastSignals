@@ -31,7 +31,7 @@ public:
 	function& operator=(function&& other) noexcept = default;
 
 	template <class Fn, typename = enable_if_callable_t<Fn, function<Return(Arguments...)>, Return, Arguments...>>
-	function(Fn&& function)
+	function(Fn&& function) noexcept(detail::is_noexcept_packed_function_init<Fn, Return, Arguments...>)
 	{
 		m_packed.init<Fn, Return, Arguments...>(std::forward<Fn>(function));
 	}

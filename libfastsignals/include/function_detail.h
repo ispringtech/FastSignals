@@ -112,7 +112,7 @@ private:
 template <class Fn, class Return, class... Arguments>
 inline constexpr bool is_noexcept_packed_function_init = can_use_inplace_buffer<function_proxy_impl<Fn, Return, Arguments...>>;
 
-class packed_function
+class packed_function final
 {
 public:
 	packed_function() = default;
@@ -149,7 +149,6 @@ public:
 	void reset() noexcept;
 
 private:
-	base_function_proxy* copy_proxy_from(const packed_function& other);
 	base_function_proxy* move_proxy_from(packed_function&& other) noexcept;
 	base_function_proxy& unwrap() const;
 	bool is_buffer_allocated() const noexcept;

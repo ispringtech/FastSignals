@@ -11,7 +11,7 @@ packed_function::packed_function(packed_function&& other) noexcept
 }
 
 packed_function::packed_function(const packed_function& other)
-	: m_proxy(copy_proxy_from(other))
+	: m_proxy(other.m_proxy ? other.m_proxy->clone(&m_buffer) : nullptr)
 {
 }
 
@@ -21,11 +21,6 @@ packed_function& packed_function::operator=(packed_function&& other) noexcept
 	reset();
 	m_proxy = move_proxy_from(std::move(other));
 	return *this;
-}
-
-base_function_proxy* packed_function::copy_proxy_from(const packed_function& other)
-{
-	return other.m_proxy ? other.m_proxy->clone(&m_buffer) : nullptr;
 }
 
 base_function_proxy* packed_function::move_proxy_from(packed_function&& other) noexcept

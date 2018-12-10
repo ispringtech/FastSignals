@@ -150,6 +150,7 @@ public:
 
 private:
 	base_function_proxy* move_proxy_from(packed_function&& other) noexcept;
+	base_function_proxy* clone_proxy_from(const packed_function &other);
 	base_function_proxy& unwrap() const;
 	bool is_buffer_allocated() const noexcept;
 

@@ -11,7 +11,7 @@ packed_function::packed_function(packed_function&& other) noexcept
 }
 
 packed_function::packed_function(const packed_function& other)
-	: m_proxy(other.m_proxy ? other.m_proxy->clone(&m_buffer) : nullptr)
+	: m_proxy(clone_proxy_from(other))
 {
 }
 
@@ -30,21 +30,26 @@ base_function_proxy* packed_function::move_proxy_from(packed_function&& other) n
 	return proxy;
 }
 
+base_function_proxy* packed_function::clone_proxy_from(const packed_function& other)
+{
+	return other.m_proxy ? other.m_proxy->clone(&m_buffer) : nullptr;
+}
+
 packed_function& packed_function::operator=(const packed_function& other)
 {
 	if (this != &other)
 	{
-		if (other.is_buffer_allocated() && m_proxy)
+		if (other.is_buffer_allocated() && is_buffer_allocated())
 		{
-			// other.m_proxy is not null
-			function_buffer_t tempBuffer;
-			auto proxy = other.m_proxy->clone(&tempBuffer);
-			reset();
-			m_proxy = proxy->move(&m_buffer);
+			// "This" and "other" are using SBO. Safe assignment must use copy+move
+			*this = packed_function(other);
 		}
 		else
 		{
-			auto newProxy = other.m_proxy ? other.m_proxy->clone(&m_buffer) : nullptr;
+			// Buffer is used either by "this" or by "other" or not used at all.
+			// If this uses buffer then other's proxy is null or allocated on heap, so clone won't overwrite buffer
+			// If this uses heap or null then other's proxy can safely use buffer because reset() won't access buffer
+			auto newProxy = clone_proxy_from(other);
 			reset();
 			m_proxy = newProxy;
 		}

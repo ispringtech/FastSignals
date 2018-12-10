@@ -57,7 +57,9 @@ bool signal_impl::get_next_slot(packed_function& slot, size_t& expectedIndex, ui
 	// Avoid binary search if next slot wasn't moved between mutex locks.
 	if (expectedIndex >= m_ids.size() || m_ids[expectedIndex] != nextId)
 	{
-		auto it = std::lower_bound(m_ids.cbegin(), m_ids.cend(), nextId);
+		auto it = (nextId < m_nextId)
+			? std::lower_bound(m_ids.cbegin(), m_ids.cend(), nextId)
+			: m_ids.end();
 		if (it == m_ids.end())
 		{
 			return false;

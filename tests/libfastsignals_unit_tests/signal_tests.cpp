@@ -509,6 +509,40 @@ TEST_CASE("Can copy and move shared_connection_block objects", "[signal]")
 	REQUIRE(callbackCalled);
 }
 
+TEST_CASE("Unblocks when shared_connection_block goes out of scope")
+{
+	bool callbackCalled = false;
+	const int value = 123;
+	signal<void(int)> event;
+	auto conn = event.connect([&](int gotValue) {
+		CHECK(gotValue == value);
+		callbackCalled = true;
+	},
+		advanced_tag{});
+
+	callbackCalled = false;
+	event(value);
+	CHECK(callbackCalled);
+
+	{
+		callbackCalled = false;
+		shared_connection_block block(conn);
+		event(value);
+		CHECK(!callbackCalled);
+
+		{
+			callbackCalled = false;
+			shared_connection_block block2(conn);
+			event(value);
+			CHECK(!callbackCalled);
+		}
+	}
+
+	callbackCalled = false;
+	event(value);
+	CHECK(callbackCalled);
+}
+
 TEST_CASE("Can disconnect advanced slot using advanced_scoped_connection", "[signal]")
 {
 	signal<void(int)> valueChanged;

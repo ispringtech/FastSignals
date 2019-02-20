@@ -63,6 +63,7 @@ public:
 	shared_connection_block(shared_connection_block&& other) noexcept;
 	shared_connection_block& operator=(const shared_connection_block& other) noexcept;
 	shared_connection_block& operator=(shared_connection_block&& other) noexcept;
+	~shared_connection_block();
 
 	void block() noexcept;
 	void unblock() noexcept;

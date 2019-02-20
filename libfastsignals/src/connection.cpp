@@ -176,6 +176,11 @@ shared_connection_block& shared_connection_block::operator=(shared_connection_bl
 	return *this;
 }
 
+shared_connection_block::~shared_connection_block()
+{
+	unblock();
+}
+
 void shared_connection_block::block() noexcept
 {
 	bool blocked = false;

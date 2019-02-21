@@ -96,7 +96,9 @@ public:
 	{
 		if constexpr (can_use_inplace_buffer<function_proxy_impl>)
 		{
-			return new (buffer) function_proxy_impl(std::move(*this));
+			base_function_proxy* moved = new (buffer) function_proxy_impl(std::move(*this));
+			this->~function_proxy_impl();
+			return moved;
 		}
 		else
 		{

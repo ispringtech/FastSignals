@@ -674,3 +674,34 @@ TEST_CASE("Signal can be used as a slot for another signal", "[signal]")
 
 	CHECK(called);
 }
+
+// memory leak fix
+TEST_CASE("Releases lambda and its captured const data", "[signal]")
+{
+	struct Captured
+	{
+		Captured(bool& released)
+			: m_released(released)
+		{
+		}
+
+		~Captured()
+		{
+			m_released = true;
+		}
+
+	private:
+		bool& m_released;
+	};
+
+	bool released = false;
+
+	{
+		const auto captured = std::make_shared<Captured>(released);
+
+		signal<void()> changeSignal;
+		changeSignal.connect([captured]{});
+	}
+
+	CHECK(released);
+}

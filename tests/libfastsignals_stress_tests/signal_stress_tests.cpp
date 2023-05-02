@@ -70,7 +70,7 @@ TEST_CASE("Can work in a few threads", "[signal]")
 {
 	constexpr unsigned fireThreadCount = 8;
 	constexpr unsigned signalsCount = 7;
-	constexpr unsigned fireCountPetThread = 100'000;
+	constexpr unsigned fireCountPerThread = 100'000;
 	constexpr unsigned connectCallsCount = 80'000;
 	constexpr unsigned totalRunCount = 10;
 
@@ -86,8 +86,11 @@ TEST_CASE("Can work in a few threads", "[signal]")
 
 		auto slot = [&] {
 			std::lock_guard lock(connectionsMutex);
-			const size_t index = get_random_index(connections.size());
-			connections.at(index).disconnect();
+			if (!connections.empty())
+			{
+				const size_t index = get_random_index(connections.size());
+				connections.at(index).disconnect();
+			}
 		};
 
 		threads.emplace_back([&] {
@@ -105,7 +108,7 @@ TEST_CASE("Can work in a few threads", "[signal]")
 		for (unsigned fti = 0; fti < fireThreadCount; ++fti)
 		{
 			threads.emplace_back([&] {
-				for (unsigned fi = 0; fi < fireCountPetThread; ++fi)
+				for (unsigned fi = 0; fi < fireCountPerThread; ++fi)
 				{
 					const size_t index = get_random_index(signalsCount);
 					signals.at(index)();

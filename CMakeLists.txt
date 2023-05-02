@@ -16,7 +16,7 @@ if(BUILD_TESTING)
     add_subdirectory(tests/libfastsignals_unit_tests)
 endif()
 
-#  Trace variables, bot environment and internal.
+#  Trace variables, both environment and internal.
 execute_process(COMMAND "${CMAKE_COMMAND}" "-E" "environment")
 get_cmake_property(_variableNames VARIABLES)
 list (SORT _variableNames)

@@ -23,7 +23,6 @@
     <ProjectGuid>{BAC23A51-8DC1-4589-940F-9923D8E12718}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>libfastsignals_unit_tests</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

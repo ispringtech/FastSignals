@@ -23,7 +23,6 @@
     <ProjectGuid>{32BD918F-EDBC-4057-A033-10DC361DA4A0}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>FastSignals</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
